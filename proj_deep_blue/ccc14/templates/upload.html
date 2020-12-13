@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block content %}
+	<h2>Upload</h2>
+	<form method="post" enctype="multipart/form-data">
+		{% csrf_token %}
+		<input type="file" class="btn btn-outline-primary" accept="image/*" name="document" required>
+		<button type="submit" class="btn btn-outline-primary">
+			Upload Image
+		</button>
+	</form>
+	{% if url %}
+    <div class="modal-body">
+    	<p>Uploaded image: 
+    		<a href="{{ url }}" target="_blank">{{ url }}</a>
+    	</p>
+    	<p>
+    		<a href="{{ url }}" target="_blank">
+    			<img id="image" style="max-width: 100%;" src="{{ url }}"/>
+    		</a>
+    	</p>
+    </div> 
+	{% endif %}
+{% endblock %}
