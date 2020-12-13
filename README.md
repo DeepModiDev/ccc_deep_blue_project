@@ -40,7 +40,11 @@
                   |    | views.py
                   |
                   |-> media   
-                  |-> proj_deep_blue   
+                  |-> proj_deep_blue
+                  |        | Settings.py
+                  |        | urls.py
+                  |        | wsgi.py
+                  |
                   |-> yolo_v4   
                   |      | karan_custom.cfg   
                   |      | obj.names  
