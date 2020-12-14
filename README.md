@@ -31,10 +31,12 @@
                   |    |     | base.html
                   |    |     | home.html
                   |    |     | upload.html
+                  |    |     | video.html
                   |    |
                   |    | admin.py 
                   |    | apps.py
                   |    | imagePrediction.py
+                  |    | videoPrediction.py
                   |    | models.py
                   |    | tests.py
                   |    | views.py
