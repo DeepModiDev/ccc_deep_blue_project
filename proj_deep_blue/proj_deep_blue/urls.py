@@ -9,7 +9,7 @@ from ccc14 import views
 urlpatterns = [
     path('', views.Home.as_view(), name='home'),
     path('upload/', views.upload, name='upload'),
-
+    path('video/',views.video,name='video'),
     path('admin/', admin.site.urls),
 ]
 
