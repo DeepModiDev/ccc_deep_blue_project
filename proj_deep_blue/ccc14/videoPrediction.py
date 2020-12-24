@@ -133,6 +133,7 @@ class VideoPrediction:
                             nmsthres)
 
         # ensure at least one detection exists
+        person_counter = 0
         if len(idxs) > 0:
             # loop over the indexes we are keeping
             for i in idxs.flatten():
@@ -147,4 +148,9 @@ class VideoPrediction:
                 #print(boxes)
                 #print(classIDs)
                 cv2.putText(image, text, (x, y - 5), cv2.FONT_HERSHEY_SIMPLEX,0.5, color, 2)
+                if (LABELS[classIDs[i]] == "Person"):
+                    person_counter += 1
+                   
+        count_txt = "Person Count: {}".format(person_counter)
+        cv2.putText(image,count_txt, (30, 30), cv2.FONT_HERSHEY_SIMPLEX,1, (0,0,255), 2)
         return image
