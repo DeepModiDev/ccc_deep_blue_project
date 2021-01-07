@@ -96,7 +96,7 @@ class VideoPrediction:
         # pass of the YOLO object detector, giving us our bounding boxes and
         # associated probabilities
         blob = cv2.dnn.blobFromImage(image, 1 / 255.0, (416, 416),
-                                 swapRB=True, crop=False)
+                                     swapRB=True, crop=False)
         net.setInput(blob)
         start = time.time()
         layerOutputs = net.forward(ln)
@@ -148,7 +148,7 @@ class VideoPrediction:
         # apply non-maxima suppression to suppress weak, overlapping bounding
         # boxes
         idxs = cv2.dnn.NMSBoxes(boxes, confidences, confthres,
-                            nmsthres)
+                                nmsthres)
 
         person_counter = 0
         # ensure at least one detection exists

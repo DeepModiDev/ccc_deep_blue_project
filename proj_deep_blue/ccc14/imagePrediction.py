@@ -30,7 +30,7 @@ class ImagePrediction:
         WEIGHTS = "karan_custom_2000.weights"
 
         print(image_path)
-        
+
         LABELS = ImagePrediction.get_labels(LABELS)
         CFG = ImagePrediction.get_config(CFG)
         WEIGHTS = ImagePrediction.get_weights(WEIGHTS)
