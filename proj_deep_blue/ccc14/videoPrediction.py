@@ -1,8 +1,11 @@
-import cv2, time, os
+import cv2, time
+import os
+os.environ['TF_FORCE_GPU_ALLOW_GROWTH'] = 'true'
 import numpy as np
+import datetime
 
-confthres=0.5  # confidence threshold value
-nmsthres=0.1
+confthres=0.50  # confidence threshold value
+nmsthres=0.30
 yolo_path= os.path.join(os.getcwd(), "yolo_v4")
 
 class VideoPrediction:
@@ -26,6 +29,8 @@ class VideoPrediction:
         # load our YOLO object detector trained on COCO dataset (80 classes)
         #print("[INFO] loading YOLO from disk...")
         net = cv2.dnn.readNetFromDarknet(configpath, weightspath)
+        net.setPreferableBackend(cv2.dnn.DNN_BACKEND_CUDA)
+        net.setPreferableTarget(cv2.dnn.DNN_TARGET_CUDA)
         return net
 
     def get_labels(labels_path):
@@ -38,24 +43,37 @@ class VideoPrediction:
     def caller(video_path):
 
         labelsPath="obj.names"
-        cfgpath="karan_custom.cfg"
-        wpath="karan_custom_best_02_12_20.weights"
+        cfgpath="karan_custom_colab.cfg"
+        wpath="deep_modi_new_dataset_cfg_best.weights"
         Lables=VideoPrediction.get_labels(labelsPath)
         CFG=VideoPrediction.get_config(cfgpath)
         Weights=VideoPrediction.get_weights(wpath)
         nets=VideoPrediction.load_model(CFG,Weights)
         Colors=VideoPrediction.get_colors(Lables)
-        image = cv2.imread(video_path)
-
         video = cv2.VideoCapture(video_path)
+
+        start_time = datetime.datetime.now()
+        total_frames = 0
+
         while(True):
             check, image = video.read()
-            image = cv2.resize(image,(950,600))
+            image = cv2.resize(image,(1080,720))
             res=VideoPrediction.get_predection(image,nets,Lables,Colors)
+
+            total_frames = total_frames + 1
+            end_time = datetime.datetime.now()
+            time_diff = end_time - start_time
+            if time_diff.seconds == 0:
+                fps = 0
+            else:
+                fps = total_frames/time_diff.seconds
+            fps_text = "FPS: {:.2f}".format(fps)
+            cv2.putText(image,fps_text,(10,20),cv2.FONT_HERSHEY_COMPLEX_SMALL,1,(0,0,255),1)
             cv2.imshow("capture", res)
             key = cv2.waitKey(1)
             if(key==ord('q')):
                 break
+
         video.release()
         cv2.destroyAllWindows()
         os.remove(video_path)
@@ -132,6 +150,7 @@ class VideoPrediction:
         idxs = cv2.dnn.NMSBoxes(boxes, confidences, confthres,
                             nmsthres)
 
+        person_counter = 0
         # ensure at least one detection exists
         if len(idxs) > 0:
             # loop over the indexes we are keeping
@@ -147,4 +166,9 @@ class VideoPrediction:
                 #print(boxes)
                 #print(classIDs)
                 cv2.putText(image, text, (x, y - 5), cv2.FONT_HERSHEY_SIMPLEX,0.5, color, 2)
+                if (LABELS[classIDs[i]] == "Person"):
+                    person_counter += 1
+
+        count_txt = "Person Count: {}".format(person_counter)
+        cv2.putText(image,count_txt, (10,40),cv2.FONT_HERSHEY_COMPLEX_SMALL,1,(0,0,255),1)
         return image

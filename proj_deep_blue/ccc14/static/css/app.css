@@ -1,4 +1,57 @@
 body {
-	background-color: #ffffff;
+	background-color: #EAF2F8;
 	font-family: 'Secular One', sans-serif;
+}
+
+.dz{
+	color: #ffffff;
+}
+
+/* .navbar{
+	background-color:#4182F7;
+} */
+.custom-card::-webkit-file-upload-button{
+	border: dashed !important;
+	border-color: #ccc !important;
+	border-radius: 10px !important;
+	color: #8e81f1;
+	display: flex;
+	background: #fff;
+	padding: 7px 15px;
+	font-weight: 700;
+	white-space: nowrap;
+	cursor: pointer;
+	width: 100%;
+	justify-content: center;
+	height:200px;
+}
+
+
+.custom-card::-webkit-file-upload-button:hover{
+	background-color: #8e81f1 !important;
+	color: #ffffff;
+}
+
+.custom-text{
+	width:100%;
+	height:200px;
+	visibility: visible;
+	display: flex;
+	align-content: center;
+	justify-content: center;
+}
+.custom-text p{
+	margin-bottom: auto;
+	margin-top: auto;
+}
+
+.home-div{
+	display: flex;
+	width: 100%;
+	justify-content:center;
+	flex-direction: column;
+}
+
+.card-body{
+	text-align: center;
 }

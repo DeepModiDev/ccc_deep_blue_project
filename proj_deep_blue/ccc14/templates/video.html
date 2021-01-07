@@ -1,7 +1,6 @@
 {% extends 'base.html' %}
 
 {% block content %}
-	<h2>Video Upload</h2>
 	<form method="post" enctype="multipart/form-data">
 		{% csrf_token %}
 		<input type="file" class="btn btn-outline-primary" accept="video/*" name="document" required>

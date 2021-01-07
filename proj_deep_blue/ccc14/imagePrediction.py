@@ -6,25 +6,45 @@ import numpy as np
 YOLO_V4_PATH = os.path.join(os.getcwd(), "yolo_v4")
 
 class ImagePrediction:
-    def caller(image_path):
+
+    def __init__(self):
+        self.predictedPersonCount = 0
+        self.predictedMannequinCount = 0
+
+    def getPredictedPersonCount(self):
+        return self.predictedPersonCount
+
+    def setPredictedPersonCount(self,personCount):
+        self.predictedPersonCount = personCount
+
+    def getPredictedMannequinCount(self):
+        return self.predictedMannequinCount
+
+    def setPredictedMannequinCount(self,mannequinCounts):
+        self.predictedMannequinCount = mannequinCounts
+
+    def caller(self,image_path):
         image = cv2.imread(image_path)
         LABELS = "obj.names"
-        CFG = "karan_custom.cfg"
-        WEIGHTS = "karan_custom_best_02_12_20.weights"
+        CFG = "karan_custom_colab.cfg"
+        WEIGHTS = "karan_custom_2000.weights"
 
+        print(image_path)
+        
         LABELS = ImagePrediction.get_labels(LABELS)
         CFG = ImagePrediction.get_config(CFG)
         WEIGHTS = ImagePrediction.get_weights(WEIGHTS)
         nets = ImagePrediction.load_model(CFG, WEIGHTS)
         COLORS = ImagePrediction.get_colors(LABELS)
 
-        predicted_image = ImagePrediction.get_predection(image, nets, LABELS, COLORS)
+        predicted_image = ImagePrediction.get_predection(self,image, nets, LABELS, COLORS)
         # image=cv2.cvtColor(image,cv2.COLOR_BGR2RGB)
         # show the output image
-        cv2.imshow("predicted_image", predicted_image)
+
+        #cv2.imshow("predicted_image", predicted_image)
         cv2.imwrite(image_path, predicted_image)
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
+        #cv2.waitKey(0)
+        #cv2.destroyAllWindows()
 
     def get_labels(labels_path):
         # load the class labels our YOLO model was trained on.
@@ -56,8 +76,8 @@ class ImagePrediction:
         print("[KARAN] COLORS = ", COLORS)
         return COLORS
 
-    def get_predection(image, net, LABELS, COLORS):
-        CONF_THRES = 0.1  # minimum probability to filter weak detections
+    def get_predection(self,image, net, LABELS, COLORS):
+        CONF_THRES = 0.5  # minimum probability to filter weak detections
         NMS_THRES = 0.1   # threshold when applyong non-maxima suppression
         (H, W) = image.shape[:2]
 
@@ -123,6 +143,8 @@ class ImagePrediction:
         idxs = cv2.dnn.NMSBoxes(boxes, confidences, CONF_THRES,
                                 NMS_THRES)
 
+        person_counter = 0
+        mannequin_count = 0
         # ensure at least one detection exists
         if len(idxs) > 0:
             # loop over the indexes we are keeping
@@ -138,4 +160,17 @@ class ImagePrediction:
                 # print(boxes)
                 # print(classIDs)
                 cv2.putText(image, text, (x, y - 5), cv2.FONT_HERSHEY_SIMPLEX,0.5, color, 2)
+                if (LABELS[classIDs[i]] == "Person"):
+                    person_counter += 1
+                if(LABELS[classIDs[i]] == "Mannequin"):
+                    mannequin_count += 1
+
+        person_count_txt = "Person Count: {}".format(person_counter)
+        mannequin_count_txt = "Mannequin Count: {}".format(mannequin_count)
+
+        self.setPredictedPersonCount(person_counter)
+        self.setPredictedMannequinCount(mannequin_count)
+
+        cv2.putText(image,person_count_txt, (2,20),cv2.FONT_HERSHEY_COMPLEX_SMALL,1,(0,0,255),1)
+        cv2.putText(image,mannequin_count_txt, (2,40),cv2.FONT_HERSHEY_COMPLEX_SMALL,1,(0,0,255),1)
         return image

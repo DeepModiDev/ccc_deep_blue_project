@@ -1,24 +1,40 @@
 {% extends 'base.html' %}
 
 {% block content %}
-	<h2>Upload</h2>
-	<form method="post" enctype="multipart/form-data">
-		{% csrf_token %}
-		<input type="file" class="btn btn-outline-primary" accept="image/*" name="document" required>
-		<button type="submit" class="btn btn-outline-primary">
-			Upload Image
-		</button>
-	</form>
+	<div style="width: 100%; display: flex; flex-direction: column; justify-content: center;">
+		<form class="dz" method="post" enctype="multipart/form-data" >
+			{% csrf_token %}
+			<input class="custom-card" id="imageChooser" type="file" name="document" onchange="form.submit()"  multiple required>
+		</form>
+	</div>
+
+	<div>
+
 	{% if url %}
-    <div class="modal-body">
-    	<p>Uploaded image: 
-    		<a href="{{ url }}" target="_blank">{{ url }}</a>
-    	</p>
-    	<p>
-    		<a href="{{ url }}" target="_blank">
-    			<img id="image" style="max-width: 100%;" src="{{ url }}"/>
-    		</a>
-    	</p>
-    </div> 
+		{% for data in url %}
+
+			{% if predictedData %}
+				{% for subData in predictedData %}
+					{% if subData.itemId == data.itemId %}
+						<p>{{ subData.outputData}}</p>
+					{% endif %}
+				{% endfor %}
+			{% endif %}
+
+		  <div class="">
+			<p>Uploaded image:
+			<a href="{{ data.link }}" target="_blank">{{ data.link }}</a>
+			</p>
+		  </div>
+		  <div class="">
+			 <p>
+			  <a href="{{ data.link }}" target="_blank">
+				  <img id="image" style="max-width: 100%;" src="{{ data.link }}"/>
+			  </a>
+			 </p>
+		  </div>
+
+		{% endfor %}
 	{% endif %}
+	</div>
 {% endblock %}

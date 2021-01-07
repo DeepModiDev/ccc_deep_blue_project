@@ -1,53 +1,109 @@
 {% load static %}
-<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  <meta name="description" content="" />
+  <meta name="author" content="" />
+  <meta name="robots" content="all,follow">
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+  <link href="https://cdn.datatables.net/1.10.20/css/dataTables.bootstrap4.min.css" rel="stylesheet" crossorigin="anonymous" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/js/all.min.js" crossorigin="anonymous"></script>
+
   <link rel="stylesheet" type="text/css" href="{% static 'css/app.css' %}">
+  <link rel="stylesheet" href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}">
+  <link rel="stylesheet" href="{% static 'vendor/font-awesome/css/font-awesome.min.css' %}">
+  <link rel="stylesheet" href="{% static 'css/fontastic.css' %}">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Poppins:300,400,700">
+  <link rel="stylesheet" href="{% static 'css/style.default.css' %}" id="theme-stylesheet">
+  <link rel="stylesheet" href="{% static 'css/custom.css' %}">
+  <link rel="shortcut icon" href="{% static 'img/favicon.ico' %}">
+
+  <!-- JavaScript files-->
+  <script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
+  <script src="{% static 'vendor/popper.js/umd/popper.min.js' %}"> </script>
+  <script src="{% static 'vendor/bootstrap/js/bootstrap.min.js' %}"></script>
+  <script src="{% static 'vendor/jquery.cookie/jquery.cookie.js' %}"> </script>
+  <script src="{% static 'vendor/chart.js/Chart.min.js' %}"></script>
+  <script src="{% static 'vendor/jquery-validation/jquery.validate.min.js' %}"></script>
+  <script src="{% static 'js/charts-home.js' %}"></script>
+<!--  <script src="{% static 'js/dropzone.js' %}"></script>-->
+
+  <!-- Main File-->
+  <script src="{% static 'js/front.js' %}"></script>
+  <script src="{% static 'js/base.js' %}"></script>
+<!--  <link href="{% static 'css/dropzone.css' %}" type="text/css" rel="stylesheet"/>-->
+
+
   <title>{% block title %}Home{% endblock %}</title>
 </head>
+
 <body>
-  <nav class="navbar navbar-expand-lg navbar-light mb-4" style="background-color:#4182F7">
-    <div class="container">
-      <a class="navbar-brand" href="{% url 'home' %}">My Site</a>
-      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <ul class="navbar-nav">
-          <li class="nav-item">
-            <a class="nav-link" href="{% url 'home' %}">Home</a>
-          </li>
-
-          <li class="nav-item">
-            <a class="nav-link" href="{% url 'upload' %}">Simple Upload</a>
-          </li>
-
-          <li class="nav-item">
-            <a class="nav-link" href="{% url 'video' %}">Video Upload</a>
-          </li>
-
-
-        </ul>
-      </div>
-    </div>
-  </nav>
-  <div class="container">
-    <div class="row justify-content-center">
-      <div class="col-lg-10 col-md-12">
-        <div class="card mb-4">
-          <div class="card-body">
-            {% block content %}
-            {% endblock %}
+<div class="page">
+  <!-- Main Navbar-->
+  <header class="header">
+    <nav class="navbar">
+      <div class="container-fluid">
+        <div class="navbar-holder d-flex align-items-center justify-content-between">
+          <!-- Navbar Header-->
+          <div class="navbar-header">
+            <!-- Navbar Brand --><a href="index.html" class="navbar-brand d-none d-sm-inline-block">
+            <div class="brand-text d-none d-lg-inline-block"><span>Bootstrap </span><strong>Dashboard</strong></div>
+            <div class="brand-text d-none d-sm-inline-block d-lg-none"><strong>BD</strong></div></a>
+            <!-- Toggle Button--><a id="toggle-btn" href="#" class="menu-btn active"><span></span><span></span><span></span></a>
           </div>
         </div>
       </div>
+    </nav>
+  </header>
+  <div class="page-content d-flex align-items-stretch">
+    <!-- Side Navbar -->
+    <nav class="side-navbar">
+      <!-- Sidebar Header-->
+      <div class="sidebar-header d-flex align-items-center">
+        <div class="avatar"><img src="{% static 'img/avatar-1.jpg' %}" alt="..." class="img-fluid rounded-circle"></div>
+        <div class="title">
+          <h1 class="h4"><a class="navbar-brand" href="{% url 'home' %}">CCC14</a></h1>
+          <p>Project Deep Blue</p>
+        </div>
+      </div>
+      <span class="heading">Admin Access</span>
+      <!-- Sidebar Header-->
+      <ul id="List" class="list-unstyled">
+        <li class="navBaseList"><a class="nav-link" href="{% url 'home' %}"><i class="icon-home"></i>Home</a></li>
+        <li class="navBaseList"> <a class="nav-link" href="{% url 'upload' %}">Upload Images</a></li>
+        <li class="navBaseList"> <a class="nav-link" href="{% url 'video' %}">Upload Videos</a></li>
+      </ul>
+    </nav>
+    <div class="content-inner">
+      <!-- Page Header-->
+      <header class="page-header">
+        <div class="container-fluid">
+          <h2 class="no-margin-bottom">Dashboard</h2>
+        </div>
+      </header>
+
+      <!-- Dashboard Counts Section-->
+      <section class="dashboard-counts no-padding-bottom">
+        <div class="container-fluid">
+          <div class="row bg-white has-shadow">
+                      {% block content %}
+                      {% endblock %}
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+      <!-- Page Footer-->
+
     </div>
   </div>
-  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
-  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
 </body>
 </html>
