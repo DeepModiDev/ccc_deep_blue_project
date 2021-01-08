@@ -77,7 +77,7 @@ class ImagePrediction:
         return COLORS
 
     def get_predection(self,image, net, LABELS, COLORS):
-        CONF_THRES = 0.5  # minimum probability to filter weak detections
+        CONF_THRES = 0.1  # minimum probability to filter weak detections
         NMS_THRES = 0.1   # threshold when applyong non-maxima suppression
         (H, W) = image.shape[:2]
 

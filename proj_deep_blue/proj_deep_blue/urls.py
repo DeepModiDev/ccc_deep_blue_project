@@ -10,6 +10,7 @@ urlpatterns = [
     path('', views.Home.as_view(), name='home'),
     path('upload/', views.upload, name='upload'),
     path('video/',views.video,name='video'),
+    path('feed/',views.feedURL,name='feedURL'),
     path('admin/', admin.site.urls),
 ]
 

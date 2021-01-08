@@ -1,11 +1,20 @@
 {% extends 'base.html' %}
 
 {% block content %}
-	<form method="post" enctype="multipart/form-data">
-		{% csrf_token %}
-		<input type="file" class="btn btn-outline-primary" accept="video/*" name="document" required>
-		<button type="submit" class="btn btn-outline-primary">
-			Upload Video
-		</button>
-	</form>
+	<div class="home-div">
+		<form method="post" action="/video/" enctype="multipart/form-data">
+			{% csrf_token %}
+			<input type="file" class="btn btn-outline-primary" accept="video/*" name="document" required>
+			<button type="submit" class="btn btn-outline-primary">
+				Upload Video
+			</button>
+		</form>
+		<p> or </p>
+		<form method="post" action="/feed/">
+			{% csrf_token %}
+			<input type="text" placeholder="Enter URL" class="btn btn-outline-primary" name="feedURL" required>
+			<button type="submit" class="btn btn-outline-primary"> GO </button>
+		</form>
+		<p> Sample URL: http://cam6284208.miemasu.net/nphMotionJpeg?Resolution=640x480&Quality=Clarity</p>
+	</div>
 {% endblock %}

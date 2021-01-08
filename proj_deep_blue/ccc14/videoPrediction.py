@@ -10,6 +10,22 @@ yolo_path= os.path.join(os.getcwd(), "yolo_v4")
 
 class VideoPrediction:
 
+    def __init__(self):
+        self.feedURL = ""
+        self.videoURL = ""
+
+    def setfeedURL(self,feedURL):
+        self.feedURL = feedURL
+
+    def setvideoURL(self,videoURL):
+        self.videoURL = videoURL
+
+    def getVideoURL(self):
+        return self.videoURL
+
+    def getfeedURL(self):
+        return self.feedURL
+
     def get_colors(LABELS):
         # initialize a list of colors to represent each possible class label
         np.random.seed(42)
@@ -40,18 +56,65 @@ class VideoPrediction:
         LABELS = open(lpath).read().strip().split("\n")
         return LABELS
 
-    def caller(video_path):
+    def caller(self):
 
         labelsPath="obj.names"
-        cfgpath="karan_custom_colab.cfg"
-        wpath="deep_modi_new_dataset_cfg_best.weights"
+        cfgpath="karan_custom.cfg"
+        wpath="karan_custom_2000.weights"
         Lables=VideoPrediction.get_labels(labelsPath)
         CFG=VideoPrediction.get_config(cfgpath)
         Weights=VideoPrediction.get_weights(wpath)
         nets=VideoPrediction.load_model(CFG,Weights)
         Colors=VideoPrediction.get_colors(Lables)
-        video = cv2.VideoCapture(video_path)
+        video = cv2.VideoCapture(self.getVideoURL())
+        #http://cam6284208.miemasu.net/nphMotionJpeg?Resolution=640x480&Quality=Clarity
+        start_time = datetime.datetime.now()
+        total_frames = 0
+        while(True):
+            check, image = video.read()
+            if check != False:
+                image = cv2.resize(image,(1080,720))
+                res=VideoPrediction.get_predection(image,nets,Lables,Colors)
 
+                total_frames = total_frames + 1
+                end_time = datetime.datetime.now()
+                time_diff = end_time - start_time
+                if time_diff.seconds == 0:
+                    fps = 0
+                else:
+                    fps = total_frames/time_diff.seconds
+                fps_text = "FPS: {:.2f}".format(fps)
+                cv2.putText(image,fps_text,(10,20),cv2.FONT_HERSHEY_COMPLEX_SMALL,1,(0,0,255),1)
+                cv2.imshow("capture", res)
+                key = cv2.waitKey(1)
+                if(key==ord('q')):
+                    break
+            else:
+                break
+
+        video.release()
+        cv2.destroyAllWindows()
+        os.remove(self.getVideoURL())
+        #print("REMOVED the temporary file")
+        # image=cv2.cvtColor(image,cv2.COLOR_BGR2RGB)
+        #show the output image
+        #cv2.imshow("Image", res)
+        #cv2.imwrite('/home/robotics5/newFolder/image.jpg', res)
+        #cv2.imwrite('/home/karan/Downloads/django-upload-example-master/image.jpg', res)
+        #cv2.waitKey()
+
+    def feedVideo(self):
+
+        labelsPath="obj.names"
+        cfgpath="karan_custom.cfg"
+        wpath="karan_custom_2000.weights"
+        Lables=VideoPrediction.get_labels(labelsPath)
+        CFG=VideoPrediction.get_config(cfgpath)
+        Weights=VideoPrediction.get_weights(wpath)
+        nets=VideoPrediction.load_model(CFG,Weights)
+        Colors=VideoPrediction.get_colors(Lables)
+        video = cv2.VideoCapture(self.getfeedURL())
+        #http://cam6284208.miemasu.net/nphMotionJpeg?Resolution=640x480&Quality=Clarity
         start_time = datetime.datetime.now()
         total_frames = 0
 
@@ -76,7 +139,6 @@ class VideoPrediction:
 
         video.release()
         cv2.destroyAllWindows()
-        os.remove(video_path)
         #print("REMOVED the temporary file")
         # image=cv2.cvtColor(image,cv2.COLOR_BGR2RGB)
         #show the output image

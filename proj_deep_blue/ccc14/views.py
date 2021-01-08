@@ -37,6 +37,18 @@ def video(request):
         uploaded_file = request.FILES['document']
         fs = FileSystemStorage()
         name = fs.save(uploaded_file.name, uploaded_file)
-        VideoPrediction.caller(os.path.join(os.getcwd(), 'media', name))
+        videoPrediction = VideoPrediction()
+        videoPrediction.setvideoURL(os.path.join(os.getcwd(), 'media', name))
+        videoPrediction.caller()
         context['url'] = fs.url(name)
     return render(request, 'video.html', context)
+
+def feedURL(request):
+    context = {}
+    if request.method == 'POST':
+        feededURL = request.POST['feedURL']
+        feedPrediction = VideoPrediction()
+        feedPrediction.setfeedURL(feededURL)
+        feedPrediction.feedVideo()
+        print(feededURL)
+    return render(request,'video.html',context)
