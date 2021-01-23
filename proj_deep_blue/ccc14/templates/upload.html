@@ -4,7 +4,7 @@
 	<div style="width: 100%; display: flex; flex-direction: column; justify-content: center;">
 		<form class="dz" method="post" enctype="multipart/form-data" >
 			{% csrf_token %}
-			<input class="custom-card" id="imageChooser" type="file" name="document" onchange="form.submit()"  multiple required>
+			<input class="custom-card" id="imageChooser" type="file" accept="image/*" name="document" onchange="form.submit()"  multiple required>
 		</form>
 	</div>
 
@@ -12,7 +12,7 @@
 
 	{% if url %}
 		{% for data in url %}
-
+			<hr style="border: 1px dashed gray">
 			{% if predictedData %}
 				{% for subData in predictedData %}
 					{% if subData.itemId == data.itemId %}
@@ -21,18 +21,18 @@
 				{% endfor %}
 			{% endif %}
 
-		  <div class="">
-			<p>Uploaded image:
-			<a href="{{ data.link }}" target="_blank">{{ data.link }}</a>
-			</p>
-		  </div>
-		  <div class="">
-			 <p>
-			  <a href="{{ data.link }}" target="_blank">
-				  <img id="image" style="max-width: 100%;" src="{{ data.link }}"/>
-			  </a>
-			 </p>
-		  </div>
+			<div class="">
+				<p>Uploaded image:
+					<a href="{{ data.link }}" target="_blank">{{ data.link }}</a>
+				</p>
+			</div>
+			<div class="">
+				<p>
+					<a href="{{ data.link }}" target="_blank">
+						<img id="image" style="max-width: 100%;" src="{{ data.link }}"/>
+					</a>
+				</p>
+			</div>
 
 		{% endfor %}
 	{% endif %}

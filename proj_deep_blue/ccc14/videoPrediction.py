@@ -59,8 +59,8 @@ class VideoPrediction:
     def caller(self):
 
         labelsPath="obj.names"
-        cfgpath="karan_custom.cfg"
-        wpath="karan_custom_2000.weights"
+        cfgpath="karan_custom_05_01_21.cfg"
+        wpath="karan_custom_best_05_01_21.weights"
         Lables=VideoPrediction.get_labels(labelsPath)
         CFG=VideoPrediction.get_config(cfgpath)
         Weights=VideoPrediction.get_weights(wpath)
@@ -106,8 +106,8 @@ class VideoPrediction:
     def feedVideo(self):
 
         labelsPath="obj.names"
-        cfgpath="karan_custom.cfg"
-        wpath="karan_custom_2000.weights"
+        cfgpath="karan_custom_05_01_21.cfg"
+        wpath="karan_custom_best_05_01_21.weights"
         Lables=VideoPrediction.get_labels(labelsPath)
         CFG=VideoPrediction.get_config(cfgpath)
         Weights=VideoPrediction.get_weights(wpath)
