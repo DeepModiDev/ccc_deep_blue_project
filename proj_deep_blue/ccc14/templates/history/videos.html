@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+    {% if errorMessage %}
+        {% for errorItems in errorMessage %}
+            <p class="alert alert-danger"> {{errorItems.message}} {{errorItems.items}}</p>
+            <hr style="border: 1px dashed gray">
+        {% endfor %}
+    {% endif %}
+
+    <!--History section-->
+    <div class="home-div" style="margin-top: 20px">
+        <div class="recent-activities card">
+            <div class="card-header">
+                <h3 class="h4">
+                    History
+                </h3>
+            </div>
+            <video id="videoPlayerView" class="img-fluid video-view" controls autoplay>
+                <source src="" type="video/mp4"/>
+            </video>
+            {% if videos %}
+            {% for video in videos %}
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-lg-4 no-padding">
+                            <div  class="image col-md-7">
+                                <a href="{{ video.videoURL }}" style="text-decoration: none" download>
+                                    <img style="border-radius: 8px" class="img-fluid" src="{{ video.videoThumbnail }}" alt="None"/>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 no-padding">
+                            <div class="text" style="margin: 5px">
+                                    <p>{{video.videoTitle}}</p>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 no-padding">
+                            <div class="row no-padding">
+                                <div class="col-4">
+                                    <button class="playVideoButton btn btn-outline-success" id="{{ video.videoTitle }}">Play</button>
+                                </div>
+                                <div class="col-4 no-padding">
+                                    <form method="post" action="{% url 'deleteVideo' video.videoId %}">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-outline-danger" >Delete</button>
+                                    </form>
+                                </div>
+                                <div class="col-4 no-padding">
+                                    <a href="{{ video.videoURL }}" class="btn btn-outline-primary" style="text-decoration: none"download>Download</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+            {% else %}
+                <p> No history found</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            $('#videoPlayerView').hide();
+        });
+    </script>
+{% endblock %}

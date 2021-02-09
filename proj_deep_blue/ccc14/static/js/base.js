@@ -1,20 +1,59 @@
-var btnContainer = document.getElementById("baseList");
+// $(document).ready(function(){
+//
+//     var csrf = $("input[name=csrfmiddlewaretoken]").val();
+//
+//     $('#uploadVideoBtn').on('click','button',function(){
+//         $.ajax({
+//             url: '/video/',
+//             type: 'post',
+//             data: {
+//                 keyWhatEverYouWant: $(this).text(),
+//                 csrfmiddlewaretoken: csrf
+//             },
+//             success: function (response) {
+//                 $('#uploadVideoBtn').text(response.videos)
+//             },
+//             failure: function(response) {
+//                 alert('Got an error dude');
+//             }
+//         });
+//     });
+// }
 
-// Get all buttons with class="btn" inside the container
-var btns = btnContainer.getElementsByClassName("navBaseList");
+//For checking whether jquery is running or not.
+// window.onload = function() {
+//     if (window.jQuery) {
+//         // jQuery is loaded
+//         alert("Yeah!");
+//
+//     } else {
+//         // jQuery is not loaded
+//         alert("Doesn't Work");
+//     }
+// }
 
-// Loop through the buttons and add the active class to the current/clicked button
-for (var i = 0; i < btns.length; i++) {
-    btns[i].addEventListener("click", function() {
-        var current = document.getElementsByClassName("active");
-        current[0].className = current[0].className.replace(" active", "");
-        this.className += " active";
+$(document).ready(function () {
+    $('button#uploadVideoBtn').on('click', function () {
+        var myForm = $("form#videoForm");
+        if (myForm) {
+            if($('#videoUrlId')[0].files.length === 0){
+                alert("Please select a video.")
+            }else {
+                $(this).prop('disabled', true);
+                $(myForm).submit();
+                $("#loadingView").show();
+            }
+        }
     });
-}
-
-$('input[type="file"]').on('change', function(e){
-    var fileName = e.target.files[0].name;
-    if (fileName) {
-        $(e.target).parent().attr('data-message', fileName);
-    }
 });
+
+
+$(document).ready(function(){
+    $('button').on('click',function () {
+        buttonId = $(this).attr('id');
+        console.log(buttonId)
+        $('#videoPlayerView').show();
+        $('#videoPlayerView source').attr('src', '/media/videos/detections/'+buttonId);
+        $("#videoPlayerView")[0].load();
+    })
+})

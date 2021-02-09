@@ -1,20 +1,93 @@
 {% extends 'base.html' %}
 
 {% block content %}
-	<div class="home-div">
-		<form method="post" action="/video/" enctype="multipart/form-data">
-			{% csrf_token %}
-			<input type="file" class="btn btn-outline-primary" accept="video/*" name="document" required>
-			<button type="submit" class="btn btn-outline-primary">
-				Upload Video
-			</button>
-		</form>
-		<p> or </p>
-		<form method="post" action="/feed/">
-			{% csrf_token %}
-			<input type="text" placeholder="Enter URL" class="btn btn-outline-primary" name="feedURL" required>
-			<button type="submit" class="btn btn-outline-primary"> GO </button>
-		</form>
-		<p> Sample URL: http://cam6284208.miemasu.net/nphMotionJpeg?Resolution=640x480&Quality=Clarity</p>
-	</div>
+
+{% if errorMessage %}
+    {% for errorItems in errorMessage %}
+        <p class="alert alert-danger"> {{errorItems.message}} {{errorItems.items}}</p>
+        <hr style="border: 1px dashed gray">
+    {% endfor %}
+{% endif %}
+
+<div class="align-items-center justify-content-center no-padding" style="padding: 10px">
+    <div class=" home-div recent-activities card">
+        <div class="row card-header" style="padding: 10px">
+            <h3 class="h4 left-col col-lg-6 d-flex align-items-center justify-content-between">
+                Upload Video or Enter URL
+            </h3>
+            <div id="loadingView" class="spinner-border" role="status">
+                <span class="sr-only">Loading...</span>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="item">
+                <form id="videoForm" method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <input id="videoUrlId" type="file" class="btn btn-outline-primary" accept="video/*" name="document" required>
+                    <button id="uploadVideoBtn"  type="submit" class="btn btn-outline-primary">
+                        Upload Video
+                    </button>
+                </form>
+                <p> or </p>
+                <form method="post" action="/feed/">
+                    {% csrf_token %}
+                    <input  type="text" placeholder="Enter URL" class="btn btn-outline-primary" name="feedURL" required>
+                    <button type="submit" class="btn btn-outline-primary" onclick="ClearForm()"> GO</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    {% if processedVideoUrl %}
+        <div class=" home-div recent-activities card">
+            <div class="row card-header" style="padding: 10px">
+                <h3 class="h4 left-col col-lg-6 d-flex align-items-center justify-content-between">
+                    Result
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="item" class="video-view" >
+                    <video name='demo' controls>
+                        <source src="{{ processedVideoUrl.url }}" type="video/mp4"/>
+                    </video>
+                </div>
+            </div>
+        </div>
+     {% endif %}
+</div>
+
+<script>
+    $(document).ready(function() {
+        $('#loadingView').hide();
+    });
+</script>
+
+<!--<div class="home-div" style="margin-top: 20px">-->
+<!--    <div class="recent-activities card">-->
+<!--        <div class="card-header">-->
+<!--            <h3 class="h4">-->
+<!--                History-->
+<!--            </h3>-->
+<!--        </div>-->
+<!--        {% if videos %}-->
+<!--        {% for video in videos %}-->
+<!--        <div class="item">-->
+<!--            <div class="row">-->
+<!--                <div class="col-4 date-holder">-->
+<!--                    <video name='demo' controls width="250px" height="150px">-->
+<!--                        <source class="video-view" src="{{ video.video.url }}" type="video/mp4"/>-->
+<!--                    </video>-->
+<!--                </div>-->
+<!--                <div class="col-8 content">-->
+<!--                    <p>{{video.title}}</p>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--        {% endfor %}-->
+<!--        {% else %}-->
+<!--        <p> No history found</p>-->
+<!--        {% endif %}-->
+<!--    </div>-->
+<!--</div>-->
+
 {% endblock %}

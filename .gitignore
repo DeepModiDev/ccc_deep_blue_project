@@ -1,2 +1,10 @@
 proj_deep_blue/yolo_v4
 proj_deep_blue/media
+*.log
+*.pot
+*.pyc
+proj_deep_blue/ccc14/__pycache__
+.idea/
+env
+proj_deep_blue/db.sqlite3
+

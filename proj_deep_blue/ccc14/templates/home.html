@@ -1,26 +1,54 @@
 {% extends 'base.html' %}
 
 {% block content %}
-  <div class="home-div">
-    <div class="card bg-dark text-white">
-      <div class="card-body">
-        <h1><b>PROJECT DEEP BLUE</b></h1>
-        <br>
-        <h3>CROUD COUNTING CHALLENGE</h3>
-      </div>
-    </div><br>
-
-    <div class="card border-success mb-3">
-      <div class="card-body text-success">
-        <h5 class="card-title">Created By: </h5>
-        <p class="card-text">
-          <h5><b>
-              MODI DEEP PIYUSHKUMAR - 18DCS048<br>
-              PADHIAR KARANSINH ATULSINH - 18DCS055<br>
-              ANIKET KANAIYALAL PATEL - 18DCS063
-          </b></h5>
-        </p>
+<!--  <h1>Total number of Admin Users = {{count}}</h1>-->
+    <div class="row bg-white has-shadow" style="margin-bottom: 20px">
+      <div class="col-xl-3 col-sm-6">
+        <div class="item d-flex align-items-center">
+          <div class="icon bg-violet align-center"><i class="icon-user"></i></div>
+          <div class="title"><span>Admin<br>Users</span>
+          </div>
+          <div class="number"><strong>{{ usersCount }}</strong></div>
+        </div>
       </div>
     </div>
-  </div>
+
+  {% if isSuperUser %}
+      <div class="card">
+        <div class="align-items-center card-header d-flex">
+          <div class="h4 no-margin">Users</div>
+        </div>
+            <div class="card-body" style="padding: 10px">
+              <div class="table-responsive">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>First Name</th>
+                      <th>Last Name</th>
+                      <th>Username</th>
+                      <th>Super user</th>
+                      <th>Last login</th>
+                      <th>Date Joined</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for user in users %}
+                      <tr>
+                        <th scope="row">{{forloop.counter}}</th>
+                        <td>{{user.first_name}}</td>
+                        <td>{{user.last_name}}</td>
+                        <td>{{user.username}}</td>
+                        <td>{{user.is_superuser}}</td>
+                        <td>{{user.last_login}}</td>
+                        <td>{{user.date_joined}}</td>
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+        </div>
+      </div>
+  {% endif %}
+
 {% endblock %}

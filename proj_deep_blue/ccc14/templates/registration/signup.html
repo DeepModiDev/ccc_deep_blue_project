@@ -1,0 +1,27 @@
+{% extends 'registration/registration_base.html' %}
+
+{% load crispy_forms_tags %}
+
+{% block subtitle %}
+	<h2 class="no-margin-bottom">Sign Up</h2>
+{% endblock %}
+
+{% block content %}
+	{% if not user.is_authenticated %}
+	<form method="post" enctype="multipart/form-data">
+		{% csrf_token %}
+		<div class="col-md-5 mb-3">
+			{{ form|crispy }}
+		</div>
+		<button class="btn btn-primary" style="margin-top: 10px" type="submit">Sign Up</button>
+	</form>
+	<p> OR </p>
+	<p>
+		<a href="{% url 'login' %}" class="btn btn-outline-primary" style="text-decoration: none;">Have an Account? Login Now</a>
+	</p>
+	{% else %}
+	<script>
+		window.location.replace("/home/");
+	</script>
+	{% endif %}
+{% endblock %}

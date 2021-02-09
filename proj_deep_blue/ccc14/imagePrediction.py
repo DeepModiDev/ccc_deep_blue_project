@@ -4,11 +4,11 @@ import time
 import numpy as np
 
 YOLO_V4_PATH = os.path.join(os.getcwd(), "yolo_v4")
-CONF_THRES = 0.50  # minimum probability to filter weak detections
+CONF_THRES = 0.25  # minimum probability to filter weak detections
 NMS_THRES = 0.30   # threshold when applyong non-maxima suppression
 LABELS = "obj.names"
-CFG = "karan_custom_05_01_21.cfg"
-WEIGHTS = "karan_custom_best_05_01_21.weights"
+CFG = "karan_custom_23_01_21.cfg"
+WEIGHTS = "karan_custom_best_23_01_21.weights"
 
 class ImagePrediction:
     def __init__(self):
@@ -33,6 +33,7 @@ class ImagePrediction:
         self.predictedMannequinCount = mannequinCounts
     
     def get_predection(self, imagePath):
+        imagePath = imagePath.replace('\\','/')
         image = cv2.imread(imagePath)
         (H, W) = image.shape[:2]
 
@@ -111,7 +112,7 @@ class ImagePrediction:
                 # draw a bounding box rectangle and label on the image
                 color = [int(c) for c in self.colors[classIDs[i]]]
                 cv2.rectangle(image, (x, y), (x + w, y + h), color, 2)
-                text = "{}: {:.4f}".format(self.labels[classIDs[i]], confidences[i])
+                text = "{}".format(self.labels[classIDs[i]])
                 # print(boxes)
                 # print(classIDs)
                 cv2.putText(image, text, (x, y - 5), cv2.FONT_HERSHEY_SIMPLEX,0.5, color, 2)

@@ -3,6 +3,7 @@ body {
 	font-family: 'Secular One', sans-serif;
 }
 
+/* EAF2F8 */
 .dz{
 	color: #ffffff;
 }
@@ -54,4 +55,24 @@ body {
 
 .card-body{
 	text-align: center;
+}
+
+.video-view{
+	border-radius: 10px;
+	border-width: 2px;
+	padding: 40px;
+}
+
+.video-thumbnail{
+	height: 150px;
+	width: 200px;
+	border-width: 2px;
+	border-radius: 10px;
+}
+
+.image-view-150h-200w{
+	height: 150px;
+	width: 250px;
+	border-radius: 10px;
+	border-width: 2px;
 }

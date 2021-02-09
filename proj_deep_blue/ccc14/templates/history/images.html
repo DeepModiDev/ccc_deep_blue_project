@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+    {% if errorMessage %}
+        {% for errorItems in errorMessage %}
+            <p class="alert alert-danger"> {{errorItems.message}} {{errorItems.items}}</p>
+            <hr style="border: 1px dashed gray">
+        {% endfor %}
+    {% endif %}
+
+    <!--History section-->
+    <div class="home-div" style="margin-top: 20px">
+        <div class="recent-activities card">
+            <div class="card-header">
+                <h3 class="h4">
+                    History
+                </h3>
+            </div>
+            {% if images %}
+            {% for image in images %}
+            <div class="item">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-lg-4 date-holder">
+                            <a href="{{ image.imageURL }}" ><img class="image-view-150h-200w" src="{{ image.imageURL }}"/></a>
+                        </div>
+                        <div class="col-lg-8 content">
+                            <p style="font-size: 14px; color: black;">{{image.imageTitle}}</p>
+                            <p style="font-size: 14px; color: black;">{{image.imageDetails}}</p>
+                            <div class="container-fluid">
+                                <div class="row no-padding">
+                                    <div class="col no-padding">
+                                        <a href="{{ image.imageURL }}" class="btn btn-primary" style="text-decoration: none"download>Download</a>
+                                    </div>
+                                    <div class="col no-padding">
+                                        <form method="post" action="{% url 'deleteImage' image.imageId %}">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn alert-danger" >Delete</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+            {% else %}
+            <p> No history found</p>
+            {% endif %}
+        </div>
+    </div>
+
+{% endblock %}
