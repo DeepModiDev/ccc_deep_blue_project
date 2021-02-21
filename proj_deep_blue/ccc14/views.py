@@ -1,32 +1,131 @@
 from django.shortcuts import render, redirect
-from django.core.files.storage import FileSystemStorage
 import os
 from .imagePrediction import ImagePrediction
 from .videoPrediction import VideoPrediction
-from .models import Images, Videos, ImageDetails
+from .models import Images, Videos, ImageDetails,DetectionVideos
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
-from datetime import datetime
+from django.contrib.admin.views.decorators import staff_member_required
+from .forms import CustomUserCreationForm,CustomUserChageForm
+from django.http import JsonResponse
+from django.core.serializers import serialize 
 
-
-@login_required
+@login_required(login_url='/accounts/login/')
 def home(request):
     context = {}
     count = User.objects.count()
+    detectionvideos = DetectionVideos.objects.all()
+    imageDetails = Images.objects.all()
+
     if request.user.is_superuser:
         users = User.objects.all()
         context['users'] = users
         context['isSuperUser'] = True
         context['usersCount'] = count
+        context['DetectionVideos'] = detectionvideos
+        context['ImageDetails'] = imageDetails
+        context['form'] = CustomUserCreationForm()
     else:
         context['count'] = count
         context['isVisible'] = False
         context['usersCount'] = count
+
     return render(request, 'home.html',context)
 
 
-@login_required
+
+#Task is is progress....... 
+@login_required(login_url='/accounts/login/')
+def profile(request):
+    context = {}
+    # if request.method == 'POST':
+    #     p_form = UserUpdateForm(request.POST,instance=request.user)
+    #     context['p_form'] = p_form
+    #     context["user"] = request.user
+    #     if p_form.is_valid():
+    #         p_form.save()
+    #         return redirect("home/profile")
+    # if request.method == 'GET':
+    #     context["user"] = request.user
+    return render(request,"profile.html",context)
+
+
+# Delete user task done...
+@login_required(login_url='/accounts/login/')
+@staff_member_required
+def deleteUser(request,pk):
+    if request.method == 'POST':
+        context = {}
+        user = User.objects.get(pk=pk)
+        if not user.is_superuser:
+            user.delete()
+            context['message'] = "User deleted successfully."
+            context['deleted'] = True
+        else:
+            context['message'] = "You can not delete this user because it is a super user."
+            context['deleted'] = False
+        return JsonResponse(context)
+
+# Add user task done...
+@login_required(login_url='/accounts/login/')
+@staff_member_required
+def addUser(request):
+    context = {}
+    errors = []
+    if request.method == 'POST':
+        form = CustomUserCreationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            errors.append("User created successfully.")
+            context['created'] = True
+            if len(form.errors) > 0:
+                for field in form:
+                    for error in field.errors:
+                        errors.append(error)
+            
+            context['message'] = errors
+            return JsonResponse(context)
+        else:
+            context['created'] = False
+            errors.append("Fail to register user.")
+            if len(form.errors) > 0:
+               for field in form:
+                    for error in field.errors:
+                        errors.append(error)
+            context['message'] = errors
+            return JsonResponse(context)
+
+
+@login_required(login_url='/account/login/')
+@staff_member_required
+def editUser(request,pk):
+    context = {}
+    if request.method == "POST":
+        user = User.objects.get(pk=pk)
+        form = CustomUserChageForm(request.POST,user)
+        
+    else:
+        context['message'] = "Unable to edit."
+        return JsonResponse(context)
+
+
+def signup(request):
+    if request.user.is_superuser:
+        if request.method == "POST":
+            form = UserCreationForm(request.POST)
+            if form.is_valid():
+                form.save()
+                return redirect("login")
+        else:
+            form = UserCreationForm()
+            return render(request, 'registration/signup.html', {'form': form})
+    else:
+        return redirect("login")
+
+
+
+@login_required(login_url='/accounts/login/')
 def upload(request):
     urlsList = []
     predictedDataDetails = []
@@ -40,14 +139,6 @@ def upload(request):
 
             if isValid:
                 if validator(image.name):
-
-                    # print("Extension match: ", validator(image.name))
-                    # fs = FileSystemStorage()
-                    # name = fs.save(image.name, image)
-                    # print("image name: ",image.name)
-                    # print("image path:",os.path.join(os.getcwd(), 'media/images/', image.name))
-                    # newName = str(currentTime.day)+"_"+str(currentTime.month)+"_"+str(currentTime.year)+"_"+str(currentTime.second)+"_"+image.name
-                    # currentTime = datetime.now()
 
                     currentUser = request.user
                     savingImage = Images(user=currentUser, image=image)
@@ -87,8 +178,7 @@ def upload(request):
         print("Current userid in get method of image: ", currentUser.id)
         return render(request, 'upload.html', context={})
 
-
-@login_required
+@login_required(login_url='/accounts/login/')
 def video(request):
     context = {}
     isValidMessage = []
@@ -131,8 +221,7 @@ def video(request):
     if request.method == 'GET':
         return render(request, 'video.html')
 
-
-@login_required
+@login_required(login_url='/accounts/login/')
 def feedURL(request):
     context = {}
     if request.method == 'POST':
@@ -143,15 +232,6 @@ def feedURL(request):
     return render(request, 'video.html', context)
 
 
-def signup(request):
-    if request.method == "POST":
-        form = UserCreationForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect("login")
-    else:
-        form = UserCreationForm()
-    return render(request, 'registration/signup.html', {'form': form})
 
 
 def validator(fileName):
@@ -162,7 +242,6 @@ def validator(fileName):
     else:
         return False
 
-
 def validatorVideo(fileName):
     extensions = [".mp4", ".avi"]
     (_, fileExtension) = os.path.splitext(fileName)
@@ -170,7 +249,6 @@ def validatorVideo(fileName):
         return True
     else:
         return False
-
 
 def sizeValidator(fileSize):
     size, type = convert_bytes(fileSize)
@@ -180,15 +258,13 @@ def sizeValidator(fileSize):
     else:
         return (False, type, tags[type])
 
-
 def sizeValidatorVideo(fileSize):
     size, type = convert_bytes(fileSize)
-    tags = {"Byte": 1e+7, "Kilobyte": 10000, "Megabyte": 100, "Gigabyte": 0.01, "Terabyte": 1e-5}
+    tags = {"Byte": 1e+7, "Kilobyte": 10000, "Megabyte": 500, "Gigabyte": 0.01, "Terabyte": 1e-5}
     if tags[type] >= size:
         return (True, type, tags[type])
     else:
         return (False, type, tags[type])
-
 
 def convert_bytes(bytes_number):
     tags = ["Byte", "Kilobyte", "Megabyte", "Gigabyte", "Terabyte"]
@@ -202,40 +278,9 @@ def convert_bytes(bytes_number):
 
     return (round(double_bytes, 2), tags[i])
 
-
 def load_videos():
     videos = Videos.objects.all()
     context = {
         'videos': videos,
     }
     return context
-
-# if request.method == 'POST':
-#     uploaded_file = request.FILES['document']
-#     title = uploaded_file.name
-#     video = Videos(title=title,video=uploaded_file)
-#     video.save()
-#     videoPath = video.video.url
-#     videoPrediction = VideoPrediction()
-#     videoPrediction.setvideoURL(os.path.join(os.getcwd(),'media',video.title))
-#     videoPrediction.setVideoTitle(title)
-#     videoPrediction.ControlledThreading()
-#     context['url'] = videoPath
-#     #
-#     print(context)
-# return render(request, 'video.html', context)
-
-# if request.method == 'POST':
-#     uploaded_file = request.FILES['document']
-#     #fs = FileSystemStorage()
-#     #fs.save('videos\\'+uploaded_file.name, uploaded_file)
-#     title = uploaded_file.name
-#     video = Videos(title=title,video=uploaded_file)
-#     video.save()
-#     videoPrediction = VideoPrediction()
-#     videoPrediction.setVideoTitle(uploaded_file.name)
-#     videoPrediction.setvideoURL(os.path.join(os.getcwd(), 'media\\videos',uploaded_file.name))
-#     videoPrediction.ControlledThreading()
-#     print("context",context)
-#     context['url'] = os.path.join(os.getcwd(), 'media\\videos',uploaded_file.name)
-# return render(request, 'video.html', context)

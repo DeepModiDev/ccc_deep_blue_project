@@ -9,47 +9,61 @@
 		{% endfor %}
 	{% endif %}
 
-	<div style="width: 100%; display: flex; flex-direction: column; justify-content: center;">
-		<form class="dz" method="post" enctype="multipart/form-data" >
-			{% csrf_token %}
-			<input class="custom-card" id="imageChooser" type="file" accept="image/*" name="document" onchange="form.submit()"  multiple required>
-			<script type="text/javascript">
-				// $('#imageChooser').bind('change', function() {
-				//
-				// 	alert('This file size is: ' + this.files[0].size/1024/1024 + "MiB");
-				// });
-			</script>
-		</form>
-	</div>
-
-	<div>
-	{% if url %}
-		{% for data in url %}
-			<hr style="border: 1px dashed gray">
-			{% if predictedData %}
-				{% for subData in predictedData %}
-					{% if subData.itemId == data.itemId %}
-						<p>{{ subData.outputData}}</p>
-					{% endif %}
-				{% endfor %}
-			{% endif %}
-
-<!--			<div class="">-->
-<!--				<p>Uploaded image:-->
-<!--					<a href="{{ data.link }}" target="_blank">{{ data.link }}</a>-->
-<!--				</p>-->
-<!--			</div>-->
-
-			<div class="">
-				<p>
-					<a href="{{ data.link }}" target="_blank">
-						<img id="image" style="max-width: 100%;" src="{{ data.link }}"/>
-					</a>
-				</p>
+<div class="align-items-center justify-content-center no-padding" style="padding: 10px">
+	<div class=" home-div recent-activities card">
+		<div class="row card-header" style="padding: 10px">
+			<h3 class="h4 left-col col-lg-6 d-flex align-items-center justify-content-between">
+				Drag and drop or upload the Images
+			</h3>
+			<div id="imageLoadingView" class="spinner-border" role="status">
+				<span class="sr-only h4">Loading...</span>
 			</div>
+			<h4  id="imageLoadingText" style="margin-left: 10px; margin-top: 5px" class="col align-items-center">Loading...</h4>
+		</div>
+		<div class="card-body">
+			<div class="item">
+				<div style="width: 100%; display: flex; flex-direction: column; justify-content: center;">
+					<form class="dz" method="post" enctype="multipart/form-data" >
+						{% csrf_token %}
+						<input class="custom-card" id="imageChooser" type="file" accept="image/*" name="document" onchange="(form.submit() & showProgress());"  multiple required>
+					</form>
+				</div>
+			</div>
+		</div>
 
-		{% endfor %}
-	{% endif %}
+		{% if url %}
+			{% for data in url %}
+				<hr style="border: 1px dashed gray">
+				{% if predictedData %}
+					{% for subData in predictedData %}
+						{% if subData.itemId == data.itemId %}
+							<span>{{ subData.outputData}}</span>
+						{% endif %}
+					{% endfor %}
+				{% endif %}
+
+				<div class="">
+					<p>
+						<a href="{{ data.link }}" target="_blank">
+							<img id="image" class="img-fluid" src="{{ data.link }}"/>
+						</a>
+					</p>
+				</div>
+
+			{% endfor %}
+		{% endif %}
 	</div>
+</div>
 
+<script>
+	$(document).ready(function() {
+		$('#imageLoadingView').hide();
+		$('#imageLoadingText').hide();
+	});
+
+	function showProgress() {
+		$('#imageLoadingView').show();
+		$('#imageLoadingText').show();
+	}
+</script>
 {% endblock %}

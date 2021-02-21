@@ -1,12 +1,57 @@
 {% extends 'base.html' %}
 
+{% load crispy_forms_tags %}
+
 {% block content %}
-<!--  <h1>Total number of Admin Users = {{count}}</h1>-->
+
+  {% if message %}
+      <div class="alert alert-danger"> <strong>{{ message }}</strong></div>
+  {% endif %}
+
+  {% if form.errors %}
+      {% for field in form %}
+          {% for error in field.errors %}
+              <div class="alert alert-danger">
+                  <strong>{{ error|escape }}</strong>
+              </div>
+          {% endfor %}
+      {% endfor %}
+      {% for error in form.non_field_errors %}
+          <div class="alert alert-danger">
+              <strong>{{ error|escape }}</strong>
+          </div>
+      {% endfor %}
+  {% endif %}
+
+  <div class="modal fade" id="addUserModel" tabindex="-1" role="dialog" aria-labelledby="addUserModelLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="addUserModelLabel">Add new user</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form method="post" enctype="multipart/form-data">
+              <div class="form-group">
+                {% csrf_token %}
+                {{form|crispy}}<br>
+                <input type="button" class="btn btn-primary" onclick="addNewUser(form);" value="Add"/>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+              </div>
+            </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
     <div class="row bg-white has-shadow" style="margin-bottom: 20px">
       <div class="col-xl-3 col-sm-6">
         <div class="item d-flex align-items-center">
           <div class="icon bg-violet align-center"><i class="icon-user"></i></div>
-          <div class="title"><span>Admin<br>Users</span>
+          <div class="title"><span>Users</span>
           </div>
           <div class="number"><strong>{{ usersCount }}</strong></div>
         </div>
@@ -17,6 +62,7 @@
       <div class="card">
         <div class="align-items-center card-header d-flex">
           <div class="h4 no-margin">Users</div>
+          <div class="btn btn btn-outline-primary btn-sm" style="margin-left:auto;" data-toggle="modal" data-target="#addUserModel">Add User</div>
         </div>
             <div class="card-body" style="padding: 10px">
               <div class="table-responsive">
@@ -28,20 +74,34 @@
                       <th>Last Name</th>
                       <th>Username</th>
                       <th>Super user</th>
+                      <th>Staff member</th>
                       <th>Last login</th>
                       <th>Date Joined</th>
+                      <th>actions</th>
                     </tr>
                   </thead>
                   <tbody>
                     {% for user in users %}
-                      <tr>
+                      <tr id="deleteTableRow-{{user.id}}">
                         <th scope="row">{{forloop.counter}}</th>
                         <td>{{user.first_name}}</td>
                         <td>{{user.last_name}}</td>
                         <td>{{user.username}}</td>
                         <td>{{user.is_superuser}}</td>
+                        <td>{{user.is_staff}}</td>
                         <td>{{user.last_login}}</td>
                         <td>{{user.date_joined}}</td>
+                        <td>
+                          <div class="row no-padding">
+                            <div class="col">
+                                {% csrf_token %}
+                                <button id="deleteUserBtn-{{user.id}}" class="btn btn-outline-danger" data-url="{% url 'deleteUser' user.id %}" onclick="deleteUserByAdmin('{{ user.id }}')">Delete</button>
+                            </div>
+                            <div class="col">
+                              <button id="deleteUserBtn" type="submit" class="btn btn-outline-success">Edit</button>
+                            </div>
+                          </div>
+                        </td>
                       </tr>
                     {% endfor %}
                   </tbody>
@@ -49,6 +109,125 @@
               </div>
         </div>
       </div>
+
+      <!-- ListView Images -->
+      <div class="recent-activities card">
+        <div class="card-header d-flex">
+          <div style="padding: 5px;"><h4>Images</h4></div>
+          <div class="dropdown" style="margin-left: auto">
+            <button class="btn btn-outline-primary btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              <i class="fa fa-filter"></i>
+            </button>
+            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+              {% for user in users %}
+                <a class="dropdown-item" href="#">{{user.username}}</a>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+
+        <div class="recent-activities">
+          {% if ImageDetails %}
+
+              {% for imageDetail in ImageDetails %}
+                      <div class="item"  id="imageRow-{{ imageDetail.pk }}">
+                        <div class="container-fluid no-padding">
+                          <div class="row">
+
+                            <div class="col-lg-4 no-padding date-holder">
+                              <a href="{{ imageDetail.image.url }}" ><img class="image-view-150h-200w" src="{{ imageDetail.image.url }}"/></a>
+                            </div>
+
+                            <div class="col-lg-4" style="text-align: left;">
+                              <p style="font-size: 14px; color: black;">{{imageDetail.pk}}</p>
+                              <p style="font-size: 14px; color: black;">{{ imageDetail.image.name }}</p>
+                              <p style="font-size: 14px; color: black;">Uploaded By: {{imageDetail.user}}</p>
+                            </div>
+
+                            <div class="col-lg-4">
+                                <div class="row no-padding">
+                                  <div class="col-4 no-padding">
+                                    <a href="{{ imageDetail.image.url }}" class="btn btn-outline-primary" style="text-decoration: none"download>Download</a>
+                                  </div>
+
+                                  <div class="col-4 no-padding">
+                                      {% csrf_token %}
+                                      <button id="deleteImageBtn-{{ imageDetail.pk }}" class="btn btn-outline-danger" onclick="deleteImageByAdmin('{{ imageDetail.pk }}')" data-url="{% url 'deleteImageByAdmin' imageDetail.pk %}">Delete</button>
+                                  </div>
+
+                                </div>
+                            </div>
+
+                          </div>
+                        </div>
+                      </div>
+              {% endfor %}
+
+          {% else %}
+            <p>No image found</p>
+          {% endif %}
+
+        </div>
+      </div>
+
+      <!-- ListView Videos -->
+      <div class="recent-activities card">
+        <div class="card-header d-flex">
+          <div style="padding: 5px;"><h4>Videos</h4></div>
+          <div class="dropdown" style="margin-left: auto">
+            <button class="btn btn-outline-primary btn-sm dropdown-toggle" type="button" id="dropdownMenuButton2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              <i class="fa fa-filter"></i>
+            </button>
+            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton2">
+              {% for user in users %}
+                <a class="dropdown-item" href="#">{{user.username}}</a>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+
+        <div class="recent-activities">
+            {% if DetectionVideos %}
+                {% for video in DetectionVideos %}
+                    <div class="container-fluid">
+                      <div class="row">
+                        <div class="col-lg-4 no-padding">
+                          <div  class="image col-md-7">
+                            <a href="{{ video.video.url }}" style="text-decoration: none" download>
+                              <img style="border-radius: 8px" class="img-fluid" src="{{ video.thumbnail.url }}" alt="None"/>
+                            </a>
+                          </div>
+                        </div>
+                        <div class="col-lg-4 no-padding">
+                          <div class="text" style="margin: 5px">
+                            <p>{{video.video.name}}</p>
+                          </div>
+                        </div>
+                        <div class="col-lg-4 no-padding">
+                          <div class="row no-padding">
+                            <div class="col-4">
+                              <button class="playVideoButton btn btn-outline-success" id="{{ video.videoTitle }}">Play</button>
+                            </div>
+                            <div class="col-4 no-padding">
+                              <form method="post" action="{% url 'deleteVideo' video.pk %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-outline-danger" >Delete</button>
+                              </form>
+                            </div>
+                            <div class="col-4 no-padding">
+                              <a href="{{ video.video.url }}" class="btn btn-outline-primary" style="text-decoration: none"download>Download</a>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+              <p>No image found</p>
+            {% endif %}
+          </div>
+      </div>
+
   {% endif %}
 
 {% endblock %}

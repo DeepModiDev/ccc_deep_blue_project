@@ -4,11 +4,19 @@ import time
 import numpy as np
 
 YOLO_V4_PATH = os.path.join(os.getcwd(), "yolo_v4")
-CONF_THRES = 0.25  # minimum probability to filter weak detections
+CONF_THRES = 0.30 # minimum probability to filter weak detections
 NMS_THRES = 0.30   # threshold when applyong non-maxima suppression
-LABELS = "obj.names"
-CFG = "karan_custom_23_01_21.cfg"
-WEIGHTS = "karan_custom_best_23_01_21.weights"
+LABELS = "16_02_2021/proj_deep_blue_16_02_2021_names.names"
+CFG = "16_02_2021/proj_deep_blue_16_02_2021_cfg_upto_3000.cfg"
+WEIGHTS = "16_02_2021/proj_deep_blue_16_02_2021_cfg_best.weights"
+
+# karan_custom_23_01_21.cfg
+# karan_custom_best_23_01_21.weights
+# obj.names
+
+# 16_02_2021/proj_deep_blue_16_02_2021_names.names
+# 16_02_2021/proj_deep_blue_16_02_2021_cfg_upto_3000.cfg
+# 16_02_2021/proj_deep_blue_16_02_2021_cfg_best.weights
 
 class ImagePrediction:
     def __init__(self):
@@ -116,10 +124,8 @@ class ImagePrediction:
                 # print(boxes)
                 # print(classIDs)
                 cv2.putText(image, text, (x, y - 5), cv2.FONT_HERSHEY_SIMPLEX,0.5, color, 2)
-                if (self.labels[classIDs[i]] == "Person"):
+                if (self.labels[classIDs[i]] == "head"):
                     person_counter += 1
-                if(self.labels[classIDs[i]] == "Mannequin"):
-                    mannequin_count += 1
 
         person_count_txt = "Person Count: {}".format(person_counter)
         mannequin_count_txt = "Mannequin Count: {}".format(mannequin_count)
@@ -127,8 +133,8 @@ class ImagePrediction:
         self.setPredictedPersonCount(person_counter)
         self.setPredictedMannequinCount(mannequin_count)
 
-        cv2.putText(image,person_count_txt, (2,20),cv2.FONT_HERSHEY_COMPLEX_SMALL,1,(0,0,255),1)
-        cv2.putText(image,mannequin_count_txt, (2,40),cv2.FONT_HERSHEY_COMPLEX_SMALL,1,(0,0,255),1)
+        #cv2.putText(image,person_count_txt, (2,20),cv2.FONT_HERSHEY_COMPLEX_SMALL,1,(0,0,255),1)
+        #cv2.putText(image,mannequin_count_txt, (2,40),cv2.FONT_HERSHEY_COMPLEX_SMALL,1,(0,0,255),1)
         
         cv2.imwrite(imagePath, image)
 

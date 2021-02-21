@@ -7,10 +7,18 @@ import time
 from queue import Queue
 from threading import Thread, Event
 from .models import DetectionVideos
-confthres = 0.25 # confidence threshold value
+confthres = 0.30 # confidence threshold value
 nmsthres = 0.30
 yolo_path = os.path.join(os.getcwd(), "yolo_v4")
 from PIL import Image
+
+# karan_custom_23_01_21.cfg
+# karan_custom_best_23_01_21.weights
+# obj.names
+
+# 16_02_2021/proj_deep_blue_16_02_2021_names.names
+# 16_02_2021/proj_deep_blue_16_02_2021_cfg_upto_3000.cfg
+# 16_02_2021/proj_deep_blue_16_02_2021_cfg_best.weights
 
 class VideoPrediction:
 
@@ -24,9 +32,9 @@ class VideoPrediction:
         self.frameQueue = Queue()
         self.detectionQueue = Queue()
         self.finalQueue = Queue()
-        self.labelsPath = "obj.names"
-        self.cfgpath = "karan_custom_23_01_21.cfg"
-        self.wpath = "karan_custom_best_23_01_21.weights"
+        self.labelsPath = "16_02_2021/proj_deep_blue_16_02_2021_names.names"
+        self.cfgpath = "16_02_2021/proj_deep_blue_16_02_2021_cfg_upto_3000.cfg"
+        self.wpath = "16_02_2021/proj_deep_blue_16_02_2021_cfg_best.weights"
         self.Lables = self.get_labels(self.labelsPath)
         self.CFG = self.get_config(self.cfgpath)
         self.Weights = self.get_weights(self.wpath)
@@ -114,7 +122,7 @@ class VideoPrediction:
                 if total_frames == 1:
                     cv2.imwrite("media/videos/detections/thumbnails/"+newName.split('.')[0]+".jpg", image)
 
-                if(total_frames%15 == 0):
+                if(total_frames%1 == 0):
                     image,person_count = self.get_predection(image, self.nets, self.Lables, self.Colors)
 
                 end_time = time.time()
@@ -267,12 +275,11 @@ class VideoPrediction:
                 # print(boxes)
                 # print(classIDs)
                 cv2.putText(image, text, (x, y - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
-                if (LABELS[classIDs[i]] == "Person"):
+                if (LABELS[classIDs[i]] == "head"):
                     person_counter += 1
         # count_txt = "Person Count: {}".format(person_counter)
         # cv2.putText(image, count_txt, (10, 40), cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (0, 0, 255), 1)
         return image,person_counter
-
 
     def preprocessing(self, video):
 

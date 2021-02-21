@@ -16,8 +16,9 @@
                 Upload Video or Enter URL
             </h3>
             <div id="loadingView" class="spinner-border" role="status">
-                <span class="sr-only">Loading...</span>
+                <span class="sr-only h4">Loading...</span>
             </div>
+                <h4 style="margin-left: 10px; margin-top: 5px" class="col align-items-center" id="LoadingText">Loading...</h4>
         </div>
         <div class="card-body">
             <div class="item">
@@ -59,6 +60,7 @@
 <script>
     $(document).ready(function() {
         $('#loadingView').hide();
+        $('#LoadingText').hide();
     });
 </script>
 

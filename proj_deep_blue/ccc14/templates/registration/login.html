@@ -9,7 +9,7 @@
 {% block content %}
 		<div class="no-padding">
 			<div class="no-padding">
-				<form method="post" enctype="multipart/form-data" novalidate>
+				<form method="post" enctype="multipart/form-data">
 					{% csrf_token %}
 					{% if not user.is_authenticated %}
 						<div class="col-md-5 mb-3">

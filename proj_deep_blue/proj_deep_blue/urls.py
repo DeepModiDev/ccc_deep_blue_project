@@ -19,6 +19,10 @@ urlpatterns = [
     path('history/images/',HistoryViews.images,name='historyImages'),    #History Video
     path('history/images/<int:pk>',HistoryViews.delete_image,name="deleteImage"), #Delete Image
     path('history/videos/<int:pk>',HistoryViews.delete_video,name="deleteVideo"), #Delete Image
+    path('home/delete/<int:pk>',views.deleteUser,name="deleteUser"), # Delete user
+    path('home/images/delete/<int:pk>',HistoryViews.delete_image_by_admin,name="deleteImageByAdmin"), # Delete Image By Admin
+    path('home/profile/',views.profile,name="profile"), #user profile
+    path('home/add/user/',views.addUser,name="addUser"), #user profile
     re_path(r'^media/(?P<path>.*)$', serve,{'document_root': settings.MEDIA_ROOT}),
     re_path(r'^static/(?P<path>.*)$', serve,{'document_root': settings.STATIC_ROOT}),
 ]
