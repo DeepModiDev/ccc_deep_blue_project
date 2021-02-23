@@ -1,5 +1,7 @@
 {% extends 'base.html' %}
 
+{% load crispy_forms_tags %}
+
 {% block content %}
 
     {% if errorMessage %}
@@ -17,6 +19,19 @@
                     History
                 </h3>
             </div>
+            <div>
+                {% if image_filter %}
+                    <form method="GET" class="align-items-center card-header d-flex">
+                        <div class="col">
+                            {{ image_filter.form|crispy }}
+                        </div>
+                        <div class="col" style="margin-left:auto; ">
+                            <input type="submit" class="btn btn-primary"/>
+                        </div>
+                    </form>
+                {% endif %}
+            </div>
+
             {% if images %}
             {% for image in images %}
             <div class="item">
@@ -28,10 +43,11 @@
                         <div class="col-lg-8 content">
                             <p style="font-size: 14px; color: black;">{{image.imageTitle}}</p>
                             <p style="font-size: 14px; color: black;">{{image.imageDetails}}</p>
+                            <p style="font-size: 14px; color: black;">{{image.date}}</p>
                             <div class="container-fluid">
                                 <div class="row no-padding">
                                     <div class="col no-padding">
-                                        <a href="{{ image.imageURL }}" class="btn btn-primary" style="text-decoration: none"download>Download</a>
+                                        <a href="{{ image.imageURL }}" class="btn btn-primary" style="text-decoration: none" download>Download</a>
                                     </div>
                                     <div class="col no-padding">
                                         <form method="post" action="{% url 'deleteImage' image.imageId %}">

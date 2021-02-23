@@ -2,7 +2,6 @@ import cv2
 import os
 os.environ['TF_FORCE_GPU_ALLOW_GROWTH'] = 'true'
 import numpy as np
-import datetime
 import time
 from queue import Queue
 from threading import Thread, Event
@@ -10,7 +9,7 @@ from .models import DetectionVideos
 confthres = 0.30 # confidence threshold value
 nmsthres = 0.30
 yolo_path = os.path.join(os.getcwd(), "yolo_v4")
-from PIL import Image
+import datetime
 
 # karan_custom_23_01_21.cfg
 # karan_custom_best_23_01_21.weights
@@ -144,7 +143,7 @@ class VideoPrediction:
         video.release()
         out.release()
 
-        detectedVideo = DetectionVideos(user_id=self.getuserId(),video=os.path.join('videos/detections/',newName),thumbnail="videos/detections/thumbnails/"+newName.split('.')[0]+".jpg")
+        detectedVideo = DetectionVideos(user_id=self.getuserId(),video=os.path.join('videos/detections/',newName),thumbnail="videos/detections/thumbnails/"+newName.split('.')[0]+".jpg",date=datetime.datetime.now())
         detectedVideo.save()
         self.setDetectedVideoUrl(detectedVideo.video)
 
@@ -390,15 +389,10 @@ class VideoPrediction:
             evtInference.set()
             self.detectionQueue.task_done()
             frameOut.write(dataFrame)
-            # key = cv2.waitKey(1)
-            # if (key == ord('q')):
-            #     self.frameQueue.clear()
-            #     self.detectionQueue.clear()
-            #     break
         video.release()
         frameOut.release()
 
-        detectedVideo = DetectionVideos(user_id=self.getuserId(),video=os.path.join('videos/detections/',self.newName),thumbnail="videos/detections/thumbnails/"+self.newName.split('.')[0]+".jpg")
+        detectedVideo = DetectionVideos(user_id=self.getuserId(),video=os.path.join('videos/detections/',self.newName),thumbnail="videos/detections/thumbnails/"+self.newName.split('.')[0]+".jpg",date=datetime.datetime.now())
         detectedVideo.save()
         self.setDetectedVideoUrl(detectedVideo.video)
 

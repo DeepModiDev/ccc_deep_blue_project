@@ -1,19 +1,28 @@
 from django.shortcuts import render,redirect
 from django.contrib.auth.decorators import login_required
+from django.contrib.admin.views.decorators import staff_member_required
 from .models import DetectionVideos, Images, ImageDetails
-from django.contrib.auth.models import User
 from django.http import JsonResponse
+from .filters import ImageFilter,VideoFilter
+from django.contrib.auth.models import User
 
 @login_required(login_url='/accounts/login/')
 def videos(request):
     videoList = []
     if request.method == "GET":
         currentUser = request.user
-        load_videos(currentUser.id,videoList)
+        userVideos = DetectionVideos.objects.filter(user_id=currentUser.id).order_by("-date")
+
+        video_filter = VideoFilter(request.GET,queryset=userVideos)
+        userVideos = video_filter.qs
+
+        for video in userVideos:
+            videoList.append({'videoURL': video.video.url, 'videoTitle': video.video.name.split('/')[2], 'videoId': video.pk, 'videoThumbnail': video.thumbnail.url,'date':video.date})
+
         context = {
-            "videos":videoList
+            "videos":videoList,
+            "video_filter":video_filter
         }
-        print("Videos: ",videoList)
         return render(request,'history/videos.html',context)
 
 @login_required(login_url='/accounts/login/')
@@ -21,23 +30,20 @@ def images(request):
     imageList = []
     if request.method == "GET":
         currentUser = request.user
-        load_images(currentUser.id,imageList)
+        usersImages = Images.objects.filter(user_id=currentUser.id)
+
+        image_filter = ImageFilter(request.GET,queryset=usersImages)
+        usersImages = image_filter.qs # here qs means query set
+
+        for images in usersImages:
+            imageDetails = ImageDetails.objects.get(image_id=images.pk)
+            imageList.append({'date':images.date,'imageURL':images.image.url,'imageTitle':images.image.name.split('/')[1],'imageId':images.pk,'imageDetails':imageDetails.imageDetails})
+
         context = {
-            "images":imageList
+            "images":imageList,
+            "image_filter":image_filter,
         }
         return render(request,'history/images.html',context)
-
-
-def load_videos(userID,videoList):
-    userVideos = DetectionVideos.objects.filter(user_id=userID).order_by("-timestamp")
-    for video in userVideos:
-        videoList.append({'videoURL':video.video.url,'videoTitle':video.video.name.split('/')[2],'videoId':video.pk,'videoThumbnail':video.thumbnail.url})
-
-def load_images(userID,imageList):
-    usersImages = Images.objects.filter(user_id=userID)
-    for images in usersImages:
-        imageDetails = ImageDetails.objects.get(image_id=images.pk)
-        imageList.append({'imageURL':images.image.url,'imageTitle':images.image.name.split('/')[1],'imageId':images.pk,'imageDetails':imageDetails.imageDetails})
 
 @login_required(login_url='/accounts/login/')
 def delete_image(request,pk):
@@ -61,3 +67,30 @@ def delete_image_by_admin(request,pk):
         data = {}
         data['deleted'] = True
     return JsonResponse(data)
+
+@login_required(login_url="/accounts/login/")
+@staff_member_required
+def users_uploaded_videos(request):
+    context = {}
+    if request.method == "GET":
+        if request.user.is_superuser:
+            context['isSuperUser'] = True
+            detectionvideos = DetectionVideos.objects.all()
+            users = User.objects.all()
+            context['users'] = users
+            context['DetectionVideos'] = detectionvideos
+            return render(request,"history/UsersVideos.html",context)
+
+@login_required(login_url="/accounts/login/")
+@staff_member_required
+def users_uploaded_images(request):
+    context = {}
+    if request.method == "GET":
+        if request.user.is_superuser:
+            context['isSuperUser'] = True
+            users = User.objects.all()
+            context['users'] = users
+            imageDetails = Images.objects.all()
+            context['ImageDetails'] = imageDetails
+            return render(request,"history/UsersImages.html",context)
+

@@ -71,9 +71,13 @@
       <div class="sidebar-header d-flex align-items-center">
         <div class="avatar"><img src="{% static 'img/icon_ccc.png' %}" alt="..." class="img-fluid rounded-circle"></div>
         <div class="title">
-          <h1 class="h4">
+          <h1 class="h5">
             {% if user.is_authenticated %}
-              <a class="navbar-brand" href="{% url 'home' %}"> {{ user.username }} </a>
+              {% if user.is_superuser %}
+                <a class="navbar-brand" href="{% url 'home' %}"> {{ user.username }} (ADMIN)</a>
+              {% else %}
+                <a class="navbar-brand" href="{% url 'home' %}"> {{ user.username }} (USER)</a>
+              {% endif %}
             {% else %}
             <h6>Unknown</h6>
             {% endif %}
@@ -84,12 +88,16 @@
       <!-- Sidebar Header-->
       <ul id="List" class="list-unstyled">
         <li class="navBaseList"><a class="nav-link" href="{% url 'home' %}"><i class="icon-home"></i>Home</a></li>
-        <li class="navBaseList"> <a class="nav-link" href="{% url 'upload' %}">Images</a></li>
-        <li class="navBaseList"> <a class="nav-link" href="{% url 'video' %}">Videos</a></li>
+        <li class="navBaseList"> <a class="nav-link" href="{% url 'upload' %}">Upload Images</a></li>
+        <li class="navBaseList"> <a class="nav-link" href="{% url 'video' %}">Upload Videos</a></li>
         <li><a href="#historyDropdown" aria-expanded="false" data-toggle="collapse"> <i class="icon-interface-windows"></i>History</a>
           <ul id="historyDropdown" class="collapse list-unstyled ">
-            <li class="navBaseList"> <a class="nav-link" href="{% url 'historyImages' %}">Images</a></li>
-            <li class="navBaseList"> <a class="nav-link" href="{% url 'historyVideos' %}">Videos</a></li>
+            <li class="navBaseList"> <a class="nav-link" href="{% url 'historyImages' %}">My Images</a></li>
+            <li class="navBaseList"> <a class="nav-link" href="{% url 'historyVideos' %}">My Videos</a></li>
+            {% if user.is_superuser %}
+              <li class="navBaseList"> <a class="nav-link" href="{% url 'historyUsersImages' %}">Users Images</a></li>
+              <li class="navBaseList"> <a class="nav-link" href="{% url 'historyUsersVideos' %}">Users Videos</a></li>
+            {% endif %}
           </ul>
         </li>
       </ul>

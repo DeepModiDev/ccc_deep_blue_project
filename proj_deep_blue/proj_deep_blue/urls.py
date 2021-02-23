@@ -17,6 +17,8 @@ urlpatterns = [
     path('accounts/', include('django.contrib.auth.urls')), # for login
     path('history/videos/',HistoryViews.videos,name='historyVideos'),    #History Images
     path('history/images/',HistoryViews.images,name='historyImages'),    #History Video
+    path('history/users-videos/',HistoryViews.users_uploaded_videos,name='historyUsersVideos'),    #History for user's uploaded images
+    path('history/users-images/',HistoryViews.users_uploaded_images,name='historyUsersImages'),    #History for user's uploaded Videos
     path('history/images/<int:pk>',HistoryViews.delete_image,name="deleteImage"), #Delete Image
     path('history/videos/<int:pk>',HistoryViews.delete_video,name="deleteVideo"), #Delete Image
     path('home/delete/<int:pk>',views.deleteUser,name="deleteUser"), # Delete user

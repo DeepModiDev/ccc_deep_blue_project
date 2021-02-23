@@ -5,7 +5,8 @@ from django.utils import timezone
 class Images(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     image = models.FileField(upload_to='images/')
-
+    date = models.DateTimeField(auto_now_add=False,blank=True,auto_now=False)
+    
     class Meta:
         verbose_name = 'Image'
         verbose_name_plural = 'Images'
@@ -36,7 +37,7 @@ class DetectionVideos(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     video = models.FileField(upload_to='videos/detections/')
     thumbnail = models.FileField(upload_to='videos/detections/thumbnails/')
-    timestamp = models.DateTimeField(default=timezone.now)
+    date = models.DateTimeField(auto_now_add=False,blank=True,auto_now=False)
 
     class Meta:
         verbose_name = 'Detection Video'

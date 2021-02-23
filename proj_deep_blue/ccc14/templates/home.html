@@ -46,19 +46,19 @@
     </div>
   </div>
 
+  {% if isSuperUser %}
 
-    <div class="row bg-white has-shadow" style="margin-bottom: 20px">
-      <div class="col-xl-3 col-sm-6">
-        <div class="item d-flex align-items-center">
-          <div class="icon bg-violet align-center"><i class="icon-user"></i></div>
-          <div class="title"><span>Users</span>
+      <div class="row bg-white has-shadow" style="margin-bottom: 20px">
+        <div class="col-xl-3 col-sm-6">
+          <div class="item d-flex align-items-center">
+            <div class="icon bg-violet align-center"><i class="icon-user"></i></div>
+            <div class="title"><span>Users</span>
+            </div>
+            <div class="number"><strong>{{ usersCount }}</strong></div>
           </div>
-          <div class="number"><strong>{{ usersCount }}</strong></div>
         </div>
       </div>
-    </div>
 
-  {% if isSuperUser %}
       <div class="card">
         <div class="align-items-center card-header d-flex">
           <div class="h4 no-margin">Users</div>
@@ -108,124 +108,6 @@
                 </table>
               </div>
         </div>
-      </div>
-
-      <!-- ListView Images -->
-      <div class="recent-activities card">
-        <div class="card-header d-flex">
-          <div style="padding: 5px;"><h4>Images</h4></div>
-          <div class="dropdown" style="margin-left: auto">
-            <button class="btn btn-outline-primary btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-              <i class="fa fa-filter"></i>
-            </button>
-            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-              {% for user in users %}
-                <a class="dropdown-item" href="#">{{user.username}}</a>
-              {% endfor %}
-            </div>
-          </div>
-        </div>
-
-        <div class="recent-activities">
-          {% if ImageDetails %}
-
-              {% for imageDetail in ImageDetails %}
-                      <div class="item"  id="imageRow-{{ imageDetail.pk }}">
-                        <div class="container-fluid no-padding">
-                          <div class="row">
-
-                            <div class="col-lg-4 no-padding date-holder">
-                              <a href="{{ imageDetail.image.url }}" ><img class="image-view-150h-200w" src="{{ imageDetail.image.url }}"/></a>
-                            </div>
-
-                            <div class="col-lg-4" style="text-align: left;">
-                              <p style="font-size: 14px; color: black;">{{imageDetail.pk}}</p>
-                              <p style="font-size: 14px; color: black;">{{ imageDetail.image.name }}</p>
-                              <p style="font-size: 14px; color: black;">Uploaded By: {{imageDetail.user}}</p>
-                            </div>
-
-                            <div class="col-lg-4">
-                                <div class="row no-padding">
-                                  <div class="col-4 no-padding">
-                                    <a href="{{ imageDetail.image.url }}" class="btn btn-outline-primary" style="text-decoration: none"download>Download</a>
-                                  </div>
-
-                                  <div class="col-4 no-padding">
-                                      {% csrf_token %}
-                                      <button id="deleteImageBtn-{{ imageDetail.pk }}" class="btn btn-outline-danger" onclick="deleteImageByAdmin('{{ imageDetail.pk }}')" data-url="{% url 'deleteImageByAdmin' imageDetail.pk %}">Delete</button>
-                                  </div>
-
-                                </div>
-                            </div>
-
-                          </div>
-                        </div>
-                      </div>
-              {% endfor %}
-
-          {% else %}
-            <p>No image found</p>
-          {% endif %}
-
-        </div>
-      </div>
-
-      <!-- ListView Videos -->
-      <div class="recent-activities card">
-        <div class="card-header d-flex">
-          <div style="padding: 5px;"><h4>Videos</h4></div>
-          <div class="dropdown" style="margin-left: auto">
-            <button class="btn btn-outline-primary btn-sm dropdown-toggle" type="button" id="dropdownMenuButton2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-              <i class="fa fa-filter"></i>
-            </button>
-            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton2">
-              {% for user in users %}
-                <a class="dropdown-item" href="#">{{user.username}}</a>
-              {% endfor %}
-            </div>
-          </div>
-        </div>
-
-        <div class="recent-activities">
-            {% if DetectionVideos %}
-                {% for video in DetectionVideos %}
-                    <div class="container-fluid">
-                      <div class="row">
-                        <div class="col-lg-4 no-padding">
-                          <div  class="image col-md-7">
-                            <a href="{{ video.video.url }}" style="text-decoration: none" download>
-                              <img style="border-radius: 8px" class="img-fluid" src="{{ video.thumbnail.url }}" alt="None"/>
-                            </a>
-                          </div>
-                        </div>
-                        <div class="col-lg-4 no-padding">
-                          <div class="text" style="margin: 5px">
-                            <p>{{video.video.name}}</p>
-                          </div>
-                        </div>
-                        <div class="col-lg-4 no-padding">
-                          <div class="row no-padding">
-                            <div class="col-4">
-                              <button class="playVideoButton btn btn-outline-success" id="{{ video.videoTitle }}">Play</button>
-                            </div>
-                            <div class="col-4 no-padding">
-                              <form method="post" action="{% url 'deleteVideo' video.pk %}">
-                                {% csrf_token %}
-                                <button type="submit" class="btn btn-outline-danger" >Delete</button>
-                              </form>
-                            </div>
-                            <div class="col-4 no-padding">
-                              <a href="{{ video.video.url }}" class="btn btn-outline-primary" style="text-decoration: none"download>Download</a>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                {% endfor %}
-            {% else %}
-              <p>No image found</p>
-            {% endif %}
-          </div>
       </div>
 
   {% endif %}

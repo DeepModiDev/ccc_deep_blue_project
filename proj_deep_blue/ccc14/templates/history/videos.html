@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 
+{% load crispy_forms_tags %}
 {% block content %}
 
     {% if errorMessage %}
@@ -17,6 +18,20 @@
                     History
                 </h3>
             </div>
+
+            <div>
+                {% if video_filter %}
+                    <form method="GET" class="align-items-center card-header d-flex">
+                        <div class="col">
+                            {{ video_filter.form|crispy }}
+                        </div>
+                        <div class="col" style="margin-left:auto; ">
+                            <input type="submit" class="btn btn-primary"/>
+                        </div>
+                    </form>
+                {% endif %}
+            </div>
+
             <video id="videoPlayerView" class="img-fluid video-view"  controls>
                 <source src="" type="video/mp4"/>
             </video>
@@ -34,6 +49,7 @@
                         <div class="col-lg-4 no-padding">
                             <div class="text" style="margin: 5px">
                                     <p>{{video.videoTitle}}</p>
+                                    <p>{{video.date}}</p>
                             </div>
                         </div>
                         <div class="col-lg-4 no-padding">

@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
 import os
+import datetime
 from .imagePrediction import ImagePrediction
 from .videoPrediction import VideoPrediction
 from .models import Images, Videos, ImageDetails,DetectionVideos
@@ -15,16 +16,11 @@ from django.core.serializers import serialize
 def home(request):
     context = {}
     count = User.objects.count()
-    detectionvideos = DetectionVideos.objects.all()
-    imageDetails = Images.objects.all()
-
     if request.user.is_superuser:
         users = User.objects.all()
         context['users'] = users
         context['isSuperUser'] = True
         context['usersCount'] = count
-        context['DetectionVideos'] = detectionvideos
-        context['ImageDetails'] = imageDetails
         context['form'] = CustomUserCreationForm()
     else:
         context['count'] = count
@@ -49,7 +45,6 @@ def profile(request):
     # if request.method == 'GET':
     #     context["user"] = request.user
     return render(request,"profile.html",context)
-
 
 # Delete user task done...
 @login_required(login_url='/accounts/login/')
@@ -123,8 +118,6 @@ def signup(request):
     else:
         return redirect("login")
 
-
-
 @login_required(login_url='/accounts/login/')
 def upload(request):
     urlsList = []
@@ -141,7 +134,7 @@ def upload(request):
                 if validator(image.name):
 
                     currentUser = request.user
-                    savingImage = Images(user=currentUser, image=image)
+                    savingImage = Images(user=currentUser, image=image,date=datetime.datetime.now())
                     savingImage.save()
 
                     newName = savingImage.image.name
@@ -175,7 +168,6 @@ def upload(request):
 
     if request.method == 'GET':
         currentUser = request.user
-        print("Current userid in get method of image: ", currentUser.id)
         return render(request, 'upload.html', context={})
 
 @login_required(login_url='/accounts/login/')
@@ -230,7 +222,6 @@ def feedURL(request):
         feedPrediction.setfeedURL(feededURL)
         feedPrediction.feedVideo()
     return render(request, 'video.html', context)
-
 
 
 
