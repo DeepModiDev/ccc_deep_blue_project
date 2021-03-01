@@ -13,6 +13,7 @@ urlpatterns = [
     path('upload/', views.upload, name='upload'), #for uploading the images
     path('video/',views.video,name='video'),    #for uploading the videos
     path('feed/',views.feedURL,name='feedURL'), #custom feed
+    path('person-tracking/',views.person_tracking,name='person-tracking'),
     path('admin/', admin.site.urls),    #Admin Url
     path('accounts/', include('django.contrib.auth.urls')), # for login
     path('history/videos/',HistoryViews.videos,name='historyVideos'),    #History Images

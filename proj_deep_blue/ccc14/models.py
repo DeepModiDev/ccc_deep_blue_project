@@ -1,18 +1,18 @@
 from django.db import models
 from django.contrib.auth.models import User
-from django.utils import timezone
 
 class Images(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     image = models.FileField(upload_to='images/')
     date = models.DateTimeField(auto_now_add=False,blank=True,auto_now=False)
+    imageTitle = models.CharField(max_length=200)
     
     class Meta:
         verbose_name = 'Image'
         verbose_name_plural = 'Images'
 
     def __str__(self):
-        return self.image.name
+        return self.imageTitle
 
     def delete(self,*args,**kwargs):
         self.image.delete()

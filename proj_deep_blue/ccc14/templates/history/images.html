@@ -19,51 +19,57 @@
                     History
                 </h3>
             </div>
-            <div>
-                {% if image_filter %}
+
+            <div class="row no-padding">
+                <div class="col no-padding">
+                  <div class="container-fluid no-padding">
+                    {% if image_filter %}
                     <form method="GET" class="align-items-center card-header d-flex">
-                        <div class="col">
-                            {{ image_filter.form|crispy }}
-                        </div>
-                        <div class="col" style="margin-left:auto; ">
-                            <input type="submit" class="btn btn-primary"/>
-                        </div>
+                      {% for field in image_filter.form %}
+                        <div class="col-5">{{ field|as_crispy_field }}</div>
+                      {% endfor %}
+                        <input type="submit" style="margin-top:15px;" class="btn btn-primary"/>
                     </form>
-                {% endif %}
+                    {% endif %}
+                  </div>
+                </div>
             </div>
 
             {% if images %}
-            {% for image in images %}
-            <div class="item">
-                <div class="container-fluid">
-                    <div class="row">
-                        <div class="col-lg-4 date-holder">
-                            <a href="{{ image.imageURL }}" ><img class="image-view-150h-200w" src="{{ image.imageURL }}"/></a>
-                        </div>
-                        <div class="col-lg-8 content">
-                            <p style="font-size: 14px; color: black;">{{image.imageTitle}}</p>
-                            <p style="font-size: 14px; color: black;">{{image.imageDetails}}</p>
-                            <p style="font-size: 14px; color: black;">{{image.date}}</p>
-                            <div class="container-fluid">
+                {% for image in images %}
+                    <div class="item"  id="imageUserRow-{{ image.imageId }}">
+                        <div class="container-fluid no-padding">
+                          <div class="row">
+
+                            <div class="col-lg-4 no-padding date-holder">
+                              <a href="{{ image.imageURL }}" ><img class="image-view-150h-200w" src="{{ image.imageURL }}"/></a>
+                            </div>
+
+                            <div class="col-lg-4" style="text-align: left;">
+                              <p style="font-size: 14px; color: black;"><b>Name: </b> {{image.imageTitle}}</p>
+                              <p style="font-size: 14px; color: black;"><b>Date: </b> {{ image.date.date}}<b>  Time: </b> {{image.date.time}}</p>
+                              <p style="font-size: 14px; color: black;"><b>Details: </b>{{image.imageDetails}}</p>
+                            </div>
+
+                            <div class="col-lg-4">
                                 <div class="row no-padding">
-                                    <div class="col no-padding">
-                                        <a href="{{ image.imageURL }}" class="btn btn-primary" style="text-decoration: none" download>Download</a>
-                                    </div>
-                                    <div class="col no-padding">
-                                        <form method="post" action="{% url 'deleteImage' image.imageId %}">
-                                                {% csrf_token %}
-                                                <button type="submit" class="btn alert-danger" >Delete</button>
-                                        </form>
-                                    </div>
+                                  <div class="col-4 no-padding">
+                                    <a href="{{ image.imageURL }}" class="btn btn-outline-primary" style="text-decoration: none"download>Download</a>
+                                  </div>
+
+                                  <div class="col-4 no-padding">
+                                      {% csrf_token %}
+                                      <button id="deleteImageByUserBtn-{{ image.imageId }}" class="btn btn-outline-danger" onclick="deleteImageByUser('{{ image.imageId }}')" data-url="{% url 'deleteImage' image.imageId %}">Delete</button>
+                                  </div>
+
                                 </div>
                             </div>
+                          </div>
                         </div>
                     </div>
-                </div>
-            </div>
-            {% endfor %}
+                {% endfor %}
             {% else %}
-            <p> No history found</p>
+            <p><b><center>No history found</center></b></p>
             {% endif %}
         </div>
     </div>

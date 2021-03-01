@@ -33,6 +33,13 @@
 // }
 
 $(document).ready(function () {
+
+    $('#imageLoadingView').hide();
+    $('#imageLoadingText').hide();
+    $('#loadingView').hide();
+    $('#LoadingText').hide();
+    $('#videoPlayerView').hide();
+
     $('button#uploadVideoBtn').on('click', function () {
         var myForm = $("form#videoForm");
         if (myForm) {
@@ -46,23 +53,47 @@ $(document).ready(function () {
             }
         }
     });
-});
 
-
-$(document).ready(function(){
-    $('button').on('click',function () {
+     $('button').on('click',function () {
         buttonId = $(this).attr('id');
         console.log(buttonId)
         $('#videoPlayerView').show();
         $('#videoPlayerView source').attr('src', '/media/videos/detections/'+buttonId);
         $("#videoPlayerView")[0].load();
     });
+
+    $('#List>li').on('click',function() {
+        $(this).addClass('active');
+    });
+
 });
+
+
+function deleteImageByUser(id){
+    var action = confirm("Do you really wants to delete this image?");
+    var endpoint = $("#deleteImageByUserBtn-"+id).attr("data-url");
+    var csrf_token = $('input[name=csrfmiddlewaretoken]').val();
+    var data = {}
+    data['csrfmiddlewaretoken'] = csrf_token;
+    if(action != false){
+        $.ajax({
+            type: "POST",
+            url: endpoint,
+            data: data,
+            dataType: 'json',
+            success: function(data){
+                if(data.deleted){
+                    $("#imageUserRow-"+id).remove();
+                }
+            },
+        });
+    }
+}
 
 function deleteImageByAdmin(id){
     var action = confirm("Do you really wants to delete this image?");
     var endpoint = $("#deleteImageBtn-"+id).attr("data-url");
-    var csrf_token = $('input[name=csrfmiddlewaretoken]').val()
+    var csrf_token = $('input[name=csrfmiddlewaretoken]').val();
     var data = {}
 
     data['csrfmiddlewaretoken'] = csrf_token;
@@ -127,6 +158,7 @@ function addNewUser(form){
     }
 }
 
-function updateUser(){
-    
+function showProgress() {
+		$('#imageLoadingView').show();
+		$('#imageLoadingText').show();
 }

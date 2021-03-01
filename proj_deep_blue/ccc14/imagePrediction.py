@@ -120,6 +120,7 @@ class ImagePrediction:
                 # draw a bounding box rectangle and label on the image
                 color = [int(c) for c in self.colors[classIDs[i]]]
                 cv2.rectangle(image, (x, y), (x + w, y + h), color, 2)
+
                 text = "{}".format(self.labels[classIDs[i]])
                 # print(boxes)
                 # print(classIDs)

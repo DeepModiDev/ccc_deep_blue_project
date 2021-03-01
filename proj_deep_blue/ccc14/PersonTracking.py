@@ -11,6 +11,7 @@ nmsthres = 0.30
 yolo_path = os.path.join(os.getcwd(), "yolo_v4")
 import datetime
 from .centroidtracker import CentroidTracker
+from .trackableobject import TrackableObject
 
 # karan_custom_23_01_21.cfg
 # karan_custom_best_23_01_21.weights
@@ -20,7 +21,7 @@ from .centroidtracker import CentroidTracker
 # 16_02_2021/proj_deep_blue_16_02_2021_cfg_upto_3000.cfg
 # 16_02_2021/proj_deep_blue_16_02_2021_cfg_best.weights
 
-class VideoPrediction:
+class PersonTracking:
 
     def __init__(self):
         self.feedURL = ""
@@ -106,44 +107,51 @@ class VideoPrediction:
         video = cv2.VideoCapture(videoUrl)
         currentTime = datetime.datetime.now()
         newName = str(currentTime.day)+"_"+str(currentTime.month)+"_"+str(currentTime.year)+"_"+str(currentTime.second)+"_"+self.getVideoTitle()
-        #http://cam6284208.miemasu.net/nphMotionJpeg?Resolution=640x480&Quality=Clarity
+        # http://cam6284208.miemasu.net/nphMotionJpeg?Resolution=640x480&Quality=Clarity
         out = cv2.VideoWriter('media/videos/detections/'+newName,-1,30.0, (1080,720))
 
-        total_person_count = 0
-        live_person_count = 0
+        totalUp = 0
+        totalDown = 0
         frame_counter = 0
         rects = []
-        person_id_list = []
 
-        ct = CentroidTracker(maxDisappeared=50, maxDistance=70)
+        ct = CentroidTracker(maxDisappeared=40, maxDistance=50)
+        trackableObjects = {}
 
         W = None
         H = None
 
         while(True):
-            check, image = video.read()
+            check, frame = video.read()
             if check != False:
-                image = cv2.resize(image,(1080,720))
+                frame = cv2.resize(frame,(1080,720))
 
                 if W is None or H is None:
-                    (H, W) = image.shape[:2]
+                    (H, W) = frame.shape[:2]
+
+                cv2.line(frame, (0, H // 2), (W, H // 2), (255, 255, 0), 2)
 
                 if frame_counter == 0:
-                    cv2.imwrite("media/videos/detections/thumbnails/"+newName.split('.')[0]+".jpg", image)
+                    cv2.imwrite("media/videos/detections/thumbnails/"+newName.split('.')[0]+".jpg", frame)
 
-                if(frame_counter%10 == 0):
-                    image, rects = self.get_prediction(image, self.nets, W ,H , self.Colors, self.Lables)
+                if frame_counter % 10 == 0:
+                    status = "Detecting"
+                    frame, rects = self.get_prediction(frame, self.nets, W, H, self.Colors, self.Lables)
+
                 else:
-                    image, person_id_list, live_person_count, total_person_count = self.tracking(image, rects, ct, person_id_list)
+                    status = "Tracking"
+                    frame, trackableObjects, totalUp, totalDown = self.tracking(frame, rects, ct, H, trackableObjects,
+                                                                           totalUp, totalDown)
 
-                text_live_person_count = "Live Person Count: " + str(live_person_count)
-                text_total_person_count = "Total Person Count: " + str(total_person_count)
-
-                cv2.putText(image, text_live_person_count, (20, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
-                cv2.putText(image, text_total_person_count, (20, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+                text_up_person_count = "Up: " + str(totalUp)
+                text_down_person_count = "Down: " + str(totalDown)
+                text_status = "Down: " + str(status)
+                cv2.putText(frame, text_up_person_count, (20, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+                cv2.putText(frame, text_down_person_count, (20, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+                cv2.putText(frame, text_status, (20, 80), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
                 frame_counter += 1
 
-                out.write(image)
+                out.write(frame)
             else:
                 break
 
@@ -240,166 +248,33 @@ class VideoPrediction:
 
         return frame, rects
 
-
-
-    def tracking(self,frame, rects, ct, person_id_list):
+    def tracking(self,frame, rects, ct, H, trackableObjects, totalUp, totalDown):
         objects = ct.update(rects)
         live_person_count = len(objects)
         for (objectID, centroid) in objects.items():
-            if objectID not in person_id_list:
-                person_id_list.append(objectID)
+
+            to = trackableObjects.get(objectID, None)
+            if to is None:
+                to = TrackableObject(objectID, centroid)
+            else:
+                y = [c[1] for c in to.centroids]
+                direction = centroid[1] - np.mean(y)
+                to.centroids.append(centroid)
+                if not to.counted:
+                    if direction < 0 and centroid[1] < H // 2:
+                        totalUp += 1
+                        to.counted = True
+
+                    elif direction > 0 and centroid[1] > H // 2:
+                        totalDown += 1
+                        to.counted = True
+
+            trackableObjects[objectID] = to
+
             text = "ID {}".format(objectID)
             cv2.putText(frame, text, (centroid[0] - 10, centroid[1] - 10),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
             cv2.circle(frame, (centroid[0], centroid[1]), 4, (0, 255, 0), -1)
             cv2.rectangle(frame, (centroid[0], centroid[1]), (centroid[2], centroid[3]), (255, 0, 0), 2)
 
-        return frame, person_id_list, live_person_count, len(person_id_list)
-
-
-
-    def preprocessing(self, video):
-
-        start_time = datetime.datetime.now()
-        total_frames = 0
-
-        while video.isOpened():
-            hasFrame, image = video.read()
-            evtPreprocessing = Event()
-            if not hasFrame:
-                break
-            image = cv2.resize(image, (1080, 720))
-
-            if total_frames == 1:
-                cv2.imwrite("media/videos/detections/thumbnails/"+self.newName.split('.')[0]+".jpg", image)
-
-            total_frames = total_frames + 1
-            end_time = datetime.datetime.now()
-            time_diff = end_time - start_time
-            if time_diff.seconds == 0:
-                fps = 0
-            else:
-                fps = total_frames / time_diff.seconds
-            fps_text = "FPS: {:.2f}".format(fps)
-            cv2.putText(image, fps_text, (10, 20), cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (0, 0, 255), 1)
-
-            # cv2.imshow('demo', image)
-            self.frameQueue.put((image, evtPreprocessing))
-            print('item added: ', self.frameQueue.qsize())
-            # time.sleep(0.01)
-            evtPreprocessing.wait()
-        video.release()
-
-    def inference(self, video, net):
-        while video.isOpened():
-            # determine only the *output* layer names that we need from YOLO
-            evtInference = Event()
-            ln = net.getLayerNames()
-            ln = [ln[i[0] - 1] for i in net.getUnconnectedOutLayers()]
-            dataFrame, evtPreprocessing = self.frameQueue.get()
-            blob = cv2.dnn.blobFromImage(dataFrame, 1 / 255.0, (416, 416),
-                                         swapRB=True, crop=False)
-            net.setInput(blob)
-            layerOutputs = net.forward(ln)
-
-            self.detectionQueue.put((dataFrame, layerOutputs, evtInference))
-            print("detection item added: ",self.detectionQueue.qsize())
-            print("item removed: ", self.frameQueue.qsize())
-            # time.sleep(0.0001)
-            evtPreprocessing.set()
-            self.frameQueue.task_done()
-            evtInference.wait()
-            # sprint(layerOutputs)
-        video.release()
-
-    def display(self, video,frameOut):
-
-        (H, W) = (720, 1080)
-        while video.isOpened():
-            boxes = []
-            confidences = []
-            classIDs = []
-
-            dataFrame, layerOutputs, evtInference = self.detectionQueue.get()
-            # loop over each of the layer outputs
-            for output in layerOutputs:
-                # loop over each of the detections
-                for detection in output:
-                    # extract the class ID and confidence (i.e., probability) of
-                    # the current object detection
-                    scores = detection[5:]
-                    # print(scores)
-                    classID = np.argmax(scores)
-                    # print(classID)
-                    confidence = scores[classID]
-
-                    # filter out weak predictions by ensuring the detected
-                    # probability is greater than the minimum probability
-                    if confidence > confthres:
-                        box = detection[0:4] * np.array([W, H, W, H])
-                        (centerX, centerY, width, height) = box.astype("int")
-                        x = int(centerX - (width / 2))
-                        y = int(centerY - (height / 2))
-                        boxes.append([x, y, int(width), int(height)])
-                        confidences.append(float(confidence))
-                        classIDs.append(classID)
-            idxs = cv2.dnn.NMSBoxes(boxes, confidences, confthres,
-                                    nmsthres)
-            person_counter = 0
-            # ensure at least one detection exists
-            if len(idxs) > 0:
-                # loop over the indexes we are keeping
-                for i in idxs.flatten():
-                    # extract the bounding box coordinates
-                    (x, y) = (boxes[i][0], boxes[i][1])
-                    (w, h) = (boxes[i][2], boxes[i][3])
-                    color = [int(c) for c in self.Colors[classIDs[i]]]
-                    cv2.rectangle(dataFrame, (x, y), (x + w, y + h), color, 2)
-                    text = "{}".format(self.Lables[classIDs[i]])
-                    cv2.putText(dataFrame, text, (x, y - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
-                    if (self.Lables[classIDs[i]] == "head"):
-                        person_counter += 1
-
-            count_txt = "Person Count: {}".format(person_counter)
-            cv2.putText(dataFrame, count_txt, (10, 40), cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (0, 0, 255), 1)
-            # cv2.imshow("demo", dataFrame)
-            print("detection item removed: ",self.detectionQueue.qsize())
-            evtInference.set()
-            self.detectionQueue.task_done()
-            frameOut.write(dataFrame)
-        video.release()
-        frameOut.release()
-
-        detectedVideo = DetectionVideos(user_id=self.getuserId(),video=os.path.join('videos/detections/',self.newName),thumbnail="videos/detections/thumbnails/"+self.newName.split('.')[0]+".jpg",date=datetime.datetime.now())
-        detectedVideo.save()
-        self.setDetectedVideoUrl(detectedVideo.video)
-
-    def ControlledThreading(self):
-        currentTime = datetime.datetime.now()
-        newName = str(currentTime.day)+"_"+str(currentTime.month)+"_"+str(currentTime.year)+"_"+str(currentTime.second)+"_"+self.getVideoTitle()
-        self.newName = newName
-        if self.getVideoTitle() != '':
-            videoUrl = self.getVideoURL().replace('\\','/')
-            frameOut = cv2.VideoWriter("media/videos/detections/" + self.newName, -1, 30.0, (1080, 720))
-
-            video = cv2.VideoCapture(videoUrl)
-
-            t1 = Thread(target=self.preprocessing, args=(video,))
-            t2 = Thread(target=self.inference, args=(video, self.nets,))
-            t3 = Thread(target=self.display, args=(video,frameOut))
-
-            t1.start()
-            t2.start()
-            t3.start()
-            print("t1 started")
-            t1.is_alive()
-            t2.is_alive()
-            t3.is_alive()
-            t1.join()
-            t2.join()
-            t3.join()
-            t1.is_alive()
-            t2.is_alive()
-            t3.is_alive()
-        else:
-            print("Something went wrong.")
+        return frame, trackableObjects, totalUp, totalDown

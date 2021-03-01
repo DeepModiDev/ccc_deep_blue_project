@@ -3,6 +3,7 @@ import os
 import datetime
 from .imagePrediction import ImagePrediction
 from .videoPrediction import VideoPrediction
+from .PersonTracking import PersonTracking
 from .models import Images, Videos, ImageDetails,DetectionVideos
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
@@ -132,9 +133,13 @@ def upload(request):
 
             if isValid:
                 if validator(image.name):
-
                     currentUser = request.user
-                    savingImage = Images(user=currentUser, image=image,date=datetime.datetime.now())
+
+                    # get the current time
+                    currentTime = datetime.datetime.now()
+                    # rename the image before saving
+                    image.name = str(currentTime.day)+"_"+str(currentTime.month)+"_"+str(currentTime.year)+"_"+str(currentTime.minute)+"_"+str(currentTime.second)+"_"+str(currentTime.microsecond)+"_"+image.name
+                    savingImage = Images(user=currentUser, image=image,date=datetime.datetime.now(),imageTitle=image.name)
                     savingImage.save()
 
                     newName = savingImage.image.name
@@ -183,9 +188,6 @@ def video(request):
             (isValid, type, size) = sizeValidatorVideo(uploaded_file.size)
 
             if isValid:
-                title = uploaded_file.name
-                # fs = FileSystemStorage()
-                # fs.save('videos\\'+uploaded_file.name, uploaded_file)
                 currentUser = request.user
                 video = Videos(user_id=currentUser.pk, video=uploaded_file)
                 video.save()
@@ -194,7 +196,7 @@ def video(request):
                 videoPrediction.setVideoTitle(video.video.name.split('/')[1])
                 videoPrediction.setvideoURL(os.path.join(os.getcwd(), 'media/', video.video.name))
                 videoPrediction.setuserId(currentUser.pk)
-                videoPrediction.caller()
+                videoPrediction.ControlledThreading()
 
                 video.delete()
                 context['processedVideoUrl'] = videoPrediction.getDetectedVideoUrl()
@@ -222,6 +224,49 @@ def feedURL(request):
         feedPrediction.setfeedURL(feededURL)
         feedPrediction.feedVideo()
     return render(request, 'video.html', context)
+
+@login_required(login_url='/accounts/login/')
+def person_tracking(request):
+    context = {}
+    isValidMessage = []
+
+    if request.method == 'POST':
+        uploaded_file = request.FILES['document']
+
+        if validatorVideo(uploaded_file.name):
+
+            (isValid, type, size) = sizeValidatorVideo(uploaded_file.size)
+
+            if isValid:
+                title = uploaded_file.name
+                # fs = FileSystemStorage()
+                # fs.save('videos\\'+uploaded_file.name, uploaded_file)
+                currentUser = request.user
+                video = Videos(user_id=currentUser.pk, video=uploaded_file)
+                video.save()
+
+                personTracking = PersonTracking()
+                personTracking.setVideoTitle(video.video.name.split('/')[1])
+                personTracking.setvideoURL(os.path.join(os.getcwd(), 'media/', video.video.name))
+                personTracking.setuserId(currentUser.pk)
+                personTracking.caller()
+
+                video.delete()
+                context['processedVideoUrl'] = personTracking.getDetectedVideoUrl()
+                print(context)
+                return render(request, 'video.html', context)
+            else:
+                isValidMessage.append({'message': 'Video size must be less than ' + str(size) + " " + type,
+                                       'items': "Problem with:" + uploaded_file.name})
+        else:
+            isValidMessage.append({'message': 'Invalid file format. Please select video only.',
+                                   'items': "Problem with:" + uploaded_file.name})
+
+        context['errorMessage'] = isValidMessage
+        return render(request, 'video.html', context)
+
+    if request.method == 'GET':
+        return render(request, 'video.html')
 
 
 

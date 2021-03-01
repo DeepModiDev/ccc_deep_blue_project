@@ -25,7 +25,7 @@ $(document).ready(function () {
     // Tooltips init
     // ------------------------------------------------------ //    
 
-    $('[data-toggle="tooltip"]').tooltip()
+    $('[data-toggle="tooltip"]').tooltip()    
 
 
     // ------------------------------------------------------- //
@@ -38,7 +38,6 @@ $(document).ready(function () {
         $(this).find('.dropdown-menu').first().stop(true, true).fadeOut();
     });
 
-    var btnContainer = document.getElementById("baseList");
 
     // ------------------------------------------------------- //
     // Sidebar Functionality
@@ -46,6 +45,7 @@ $(document).ready(function () {
     $('#toggle-btn').on('click', function (e) {
         e.preventDefault();
         $(this).toggleClass('active');
+
         $('.side-navbar').toggleClass('shrinked');
         $('.content-inner').toggleClass('active');
         $(document).trigger('sidebarChanged');
@@ -172,4 +172,5 @@ $(document).ready(function () {
 
         return false;
     });
+
 });

@@ -7,34 +7,20 @@
   <meta name="description" content="" />
   <meta name="author" content="" />
   <meta name="robots" content="all,follow">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/js/all.min.js" crossorigin="anonymous"></script>
-
-  <link rel="stylesheet" type="text/css" href="{% static '/css/app.css' %}">
-  <link rel="stylesheet" href="{% static 'css/fontastic.css' %}">
-  <link rel="stylesheet" href="{% static 'css/custom.css' %}">
-  <link rel="shortcut icon" href="{% static 'img/icon_ccc.png' %}">
+  <!-- Bootstrap CSS-->
+  <link rel="stylesheet" href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}">
+  <!-- Font Awesome CSS-->
   <link rel="stylesheet" href="{% static 'vendor/font-awesome/css/font-awesome.min.css' %}">
-  <link rel="stylesheet" href="{% static 'css/style.default.css' %}" id="theme-stylesheet">
+  <!-- Fontastic Custom icon font-->
+  <link rel="stylesheet" href="{% static 'css/fontastic.css' %}">
+  <!-- Google fonts - Poppins -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Poppins:300,400,700">
-  <link href="https://unpkg.com/video.js/dist/video-js.min.css" rel="stylesheet">
-  <script src="https://unpkg.com/video.js/dist/video.min.js"></script>
-
-  <!-- JavaScript files-->
-  <script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
-<!--  <script src="{% static 'vendor/popper.js/umd/popper.min.js' %}"> </script>-->
-<!--<script src="{% static 'vendor/bootstrap/js/bootstrap.min.js' %}"></script>-->
-  <script src="{% static 'vendor/jquery-validation/jquery.validate.min.js' %}"></script>
-
-  <!--  <script src="{% static 'vendor/jquery.cookie/jquery.cookie.js' %}"> </script>-->
-  <!--  <script src="{% static 'vendor/chart.js/Chart.min.js' %}"></script>-->
-  <!--  <script src="{% static 'js/charts-home.js' %}"></script>-->
-  <!--  <script src="{% static 'js/dropzone.js' %}"></script>-->
-
-  <!-- Main File-->
-  <script src="{% static 'js/front.js' %}"></script>
-  <script src="{% static 'js/base.js' %}"></script>
-
+  <!-- Custom CSS -->
+  <link rel="stylesheet" type="text/css" href="{% static '/css/app.css' %}">
+  <!-- theme stylesheet-->
+  <link rel="stylesheet" href="{% static 'css/style.default.css' %}" id="theme-stylesheet">
+  <!-- Favicon-->
+  <link rel="shortcut icon" href="{% static 'img/icon_ccc.png' %}">
 
   <title>{% block title %}Home{% endblock %}</title>
 </head>
@@ -87,16 +73,18 @@
       <span class="heading">Admin Access</span>
       <!-- Sidebar Header-->
       <ul id="List" class="list-unstyled">
-        <li class="navBaseList"><a class="nav-link" href="{% url 'home' %}"><i class="icon-home"></i>Home</a></li>
-        <li class="navBaseList"> <a class="nav-link" href="{% url 'upload' %}">Upload Images</a></li>
-        <li class="navBaseList"> <a class="nav-link" href="{% url 'video' %}">Upload Videos</a></li>
+        <li><a class="nav-link" href="{% url 'home' %}"><i class="icon-home"></i>Home</a></li>
+        <li> <a class="nav-link" href="{% url 'upload' %}">Upload Images</a></li>
+        <li> <a class="nav-link" href="{% url 'video' %}">Upload Videos</a></li>
+        <li> <a class="nav-link" href="{% url 'person-tracking' %}">Person detection by Tracking</a></li>
+
         <li><a href="#historyDropdown" aria-expanded="false" data-toggle="collapse"> <i class="icon-interface-windows"></i>History</a>
           <ul id="historyDropdown" class="collapse list-unstyled ">
-            <li class="navBaseList"> <a class="nav-link" href="{% url 'historyImages' %}">My Images</a></li>
-            <li class="navBaseList"> <a class="nav-link" href="{% url 'historyVideos' %}">My Videos</a></li>
+            <li> <a class="nav-link" href="{% url 'historyImages' %}">My Images</a></li>
+            <li> <a class="nav-link" href="{% url 'historyVideos' %}">My Videos</a></li>
             {% if user.is_superuser %}
-              <li class="navBaseList"> <a class="nav-link" href="{% url 'historyUsersImages' %}">Users Images</a></li>
-              <li class="navBaseList"> <a class="nav-link" href="{% url 'historyUsersVideos' %}">Users Videos</a></li>
+              <li> <a class="nav-link" href="{% url 'historyUsersImages' %}">Users Images</a></li>
+              <li> <a class="nav-link" href="{% url 'historyUsersVideos' %}">Users Videos</a></li>
             {% endif %}
           </ul>
         </li>
@@ -126,7 +114,16 @@
   </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+    <!-- JavaScript files-->
+    <script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
+    <script src="{% static 'vendor/popper.js/umd/popper.min.js' %}"> </script>
+    <script src="{% static 'vendor/bootstrap/js/bootstrap.min.js' %}"></script>
+    <script src="{% static 'vendor/jquery.cookie/jquery.cookie.js' %}"> </script>
+<!--    <script src="{% static 'vendor/chart.js/Chart.min.js' %}"></script>-->
+    <script src="{% static 'vendor/jquery-validation/jquery.validate.min.js' %}"></script>
+<!--    <script src="{% static 'js/charts-home.js' %}"></script>-->
+    <!-- Main File-->
+    <script src="{% static 'js/front.js' %}"></script>
+    <script src="{% static 'js/base.js' %}"></script>
 </body>
 </html>
