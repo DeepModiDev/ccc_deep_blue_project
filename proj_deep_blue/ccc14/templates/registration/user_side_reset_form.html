@@ -1,0 +1,27 @@
+{% extends 'registration/registration_base.html' %}
+
+{% load crispy_forms_tags %}
+
+{% block subtitle %}
+    {% if form %}
+	    <h2 class="no-margin-bottom">Enter new password</h2>
+    {% else %}
+        <h2 class="no-margin-bottom">Invalid url</h2>
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form|crispy }}
+            <br>
+            {% if form %}
+                <input class="btn btn-success" type="submit" value="Update Password"/>
+            {% else %}
+                <div class="alert alert-danger">
+                    <span>Alert:</span>
+                    <p>This link is invalid please contact admin.</p>
+                </div>
+            {% endif %}
+        </form>
+{% endblock %}

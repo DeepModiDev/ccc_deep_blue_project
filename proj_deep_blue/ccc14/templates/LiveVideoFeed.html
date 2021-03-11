@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+
+{% block page_title %}
+  Upload Video / Camera Live Feed
+{% endblock %}
+
+{% block content %}
+
+{% if errorMessage %}
+    {% for errorItems in errorMessage %}
+<p class="alert alert-danger" xmlns="http://www.w3.org/1999/html"> {{errorItems.message}} {{errorItems.items}}</p>
+        <hr style="border: 1px dashed gray">
+    {% endfor %}
+{% endif %}
+
+<div class="align-items-center justify-content-center no-padding" style="padding: 10px">
+    <div class=" home-div recent-activities card">
+        <div class="row card-header" style="padding: 10px">
+            <h3 class="h4 left-col col-lg-6 d-flex align-items-center justify-content-between">
+                Upload Video or Enter URL
+            </h3>
+            <div id="loadingView" class="spinner-border" role="status">
+                <span class="sr-only h4">Processing...</span>
+            </div>
+                <h4 style="margin-left: 10px; margin-top: 5px" class="col align-items-center" id="LoadingText">Processing...</h4>
+        </div>
+        <div class="card-body">
+            <div class="item" style="padding:10px;">
+                {% csrf_token %}
+                <input  type="text" placeholder="Enter URL" class="btn btn-outline-primary" name="feedURL" required>
+                <button type="button" class="btn btn-outline-primary" onclick="liveFeedVideoURL()">GO</button>
+            </div>
+        </div>
+        <div style="padding:10px;">
+            Supported url:
+            <ul>
+                <li>
+                    http://ip_address/video/mjpeg
+                </li>
+                <li>
+                    rtsp://ip_address/video/h264
+                </li>
+                <li>
+                    rtsp://{username}:{password}@{ip}/{etc}
+                </li>
+            </ul>
+        </div>
+        <img id="live_feed_player" src="" onerror="this.onerror=null;this.hide;"/>
+    </div>
+
+    {% if processedVideoUrl %}
+        <div class=" home-div recent-activities card">
+            <div class="row card-header" style="padding: 10px">
+                <h3 class="h4 left-col col-lg-6 d-flex align-items-center justify-content-between">
+                    Result
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="item" class="video-view" >
+                    <video name='demo' controls>
+                        <source src="{{ processedVideoUrl.url }}" type="video/mp4"/>
+                    </video>
+                </div>
+            </div>
+        </div>
+     {% endif %}
+
+</div>
+{% endblock %}
+
+
+<!--
+
+################## Please dont delete these comments they are important #############################
+
+    <img src="data:image/jpeg;base64,{{ images }}"/>
+    <img src="{% url 'trial_feed' '192.168.43.1:8080' %}"/>
+    <img style="height:460px; width:300px;" id="live_feed_player" src="{% url 'webcam_feed' %}" alt="fnfof"/>
+
+-->
