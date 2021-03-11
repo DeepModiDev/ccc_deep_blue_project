@@ -2,65 +2,81 @@
 
 {% load crispy_forms_tags %}
 
+{% block page_title %}
+  History
+{% endblock %}
+
 {% block content %}
 
-    {% if isSuperUser %}
+    {% if isMallOwner %}
           <!-- ListView Videos -->
           <div class="recent-activities card">
             <div class="card-header d-flex">
-              <div style="padding: 5px;"><h4>Videos</h4></div>
-              <div class="dropdown" style="margin-left: auto">
-            <button class="btn btn-outline-primary btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-              <i class="fa fa-filter"></i>
-            </button>
-            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-              {% for user in users %}
-                <a class="dropdown-item" style="text-decoration:none;">
-                  <div class="custom-control custom-checkbox">
-                    <input type="checkbox" class="custom-control-input" id="ckid-{{user.username}}">
-                    <label class="custom-control-label" for="ckid-{{user.username}}">{{user.username}}</label>
-                  </div>
-                </a>
-              {% endfor %}
+              <div style="padding: 5px;"><h4>All User's Videos</h4></div>
             </div>
-          </div>
+
+            <div class="row no-padding">
+                <div class="col no-padding">
+                  <div class="container-fluid no-padding">
+                    {% if video_filter_admin %}
+                    <form method="GET" class="align-items-center card-header d-flex">
+                      {% for field in video_filter_admin.form %}
+                        <div class="col" style="margin-left:auto;">{{ field|as_crispy_field }}</div>
+                       {% endfor %}
+                        <input type="submit" style="margin-top:15px;" class="btn btn-primary"/>
+                    </form>
+                    {% endif %}
+                  </div>
+                </div>
+            </div>
+
+            <div id="videoPlayerContainer" style="padding:20px;">
+                <button id="videoCloseBtn" type="button" class="btn btn-primary" style="margin-left:auto;" onclick="closeVideoPlayer();">
+                    <span>&times;</span>
+                </button>
+                <video id="videoPlayerView" class="img-fluid video-view"  controls="controls">
+                    <source src="" type="video/mp4"/>
+                </video>
             </div>
 
             <div class="recent-activities">
-                {% if DetectionVideos %}
-                    {% for video in DetectionVideos %}
+                {% if VideoFiles %}
+                    {% for video in VideoFiles %}
+                      <div id="userUploadedVideoRow-{{video.videoId}}" class="item no-padding">
                         <div class="container-fluid">
                           <div class="row">
-                            <div class="col-lg-4 no-padding">
-                              <div  class="image col-md-7">
-                                <a href="{{ video.video.url }}" style="text-decoration: none" download>
-                                  <img style="border-radius: 8px" class="img-fluid" src="{{ video.thumbnail.url }}" alt="None"/>
-                                </a>
+
+                              <div class="col-lg-3 date-holder">
+                                <div class="no-padding">
+                                  <a href="{{ video.videoURL }}" style="text-decoration: none; padding:20px;">
+                                    <img style="border-radius: 8px" class="img-fluid" src="{{ video.videoThumbnail }}" alt="None"/>
+                                  </a>
+                                </div>
                               </div>
-                            </div>
-                            <div class="col-lg-4 no-padding">
-                              <div class="text" style="margin: 5px">
-                                <p>{{video.video.name}}</p>
+
+                              <div class="col-lg-5" style="text-align: left;">
+                                <p style="font-size: 14px; color: black;"><b>Name: </b> {{video.videoTitle}}</p>
+                                <p style="font-size: 14px; color: black;"><b>Date: </b> {{ video.date.date}}<b>&nbsp;&nbsp;&nbsp;Time: </b> {{video.date.time}}</p>
+                                <p style="font-size: 14px; color: black;"><b>Uploaded By:</b> {{video.user.username}}</p>
                               </div>
-                            </div>
-                            <div class="col-lg-4 no-padding">
+
+                            <div class="col-lg-4">
                               <div class="row no-padding">
-                                <div class="col-4">
-                                  <button class="playVideoButton btn btn-outline-success" id="{{ video.videoTitle }}">Play</button>
+                                <div class="col-md-5">
+                                  <a href="{{ video.videoURL }}" class="btn btn-outline-primary" style="text-decoration: none"download>Download</a>
                                 </div>
-                                <div class="col-4 no-padding">
-                                  <form method="post" action="{% url 'deleteVideo' video.pk %}">
-                                    {% csrf_token %}
-                                    <button type="submit" class="btn btn-outline-danger" >Delete</button>
-                                  </form>
+                                <div class="col-md-3">
+                                  <button id="videoForPlayBtn-{{ video.videoId }}" class="playVideoButton btn btn-outline-success" onclick="playVideo('{{ video.videoTitle }}',{{ video.videoId }});">Play</button>
                                 </div>
-                                <div class="col-4 no-padding">
-                                  <a href="{{ video.video.url }}" class="btn btn-outline-primary" style="text-decoration: none"download>Download</a>
+                                <div class="col-md-4">
+                                  {% csrf_token %}
+                                  <button id="deleteVideoByAdminBtn-{{ video.videoId }}" class="btn btn-outline-danger" onclick="deleteVideoByAdmin('{{ video.videoId }}')" data-url="{% url 'deleteVideoByAdmin' video.videoId %}">Delete</button>
                                 </div>
                               </div>
                             </div>
                           </div>
                         </div>
+                      </div>
                     {% endfor %}
                 {% else %}
                   <p><b><center>No history found</center></b></p>

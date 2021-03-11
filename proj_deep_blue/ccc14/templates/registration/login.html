@@ -6,7 +6,16 @@
 	<h2 class="no-margin-bottom">Log In</h2>
 {% endblock %}
 
+
 {% block content %}
+
+		{% if form.non_field_errors %}
+			<ul class="alert alert-danger">
+				{% for error in form.non_field_errors %}
+					<li style="margin-left : 10px;">{{ error }}</li>
+				{% endfor %}
+			</ul>
+		{% endif %}
 		<div class="no-padding">
 			<div class="no-padding">
 				<form method="post" enctype="multipart/form-data">

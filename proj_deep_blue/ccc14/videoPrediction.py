@@ -32,9 +32,9 @@ class VideoPrediction:
         self.frameQueue = Queue()
         self.detectionQueue = Queue()
         self.finalQueue = Queue()
-        self.labelsPath = "16_02_2021/proj_deep_blue_16_02_2021_names.names"
-        self.cfgpath = "16_02_2021/proj_deep_blue_16_02_2021_cfg_upto_3000.cfg"
-        self.wpath = "16_02_2021/proj_deep_blue_16_02_2021_cfg_best.weights"
+        self.labelsPath = "11_03_2021/obj.names"
+        self.cfgpath = "11_03_2021/custom.cfg"
+        self.wpath = "11_03_2021/custom_best.weights"
         self.Lables = self.get_labels(self.labelsPath)
         self.CFG = self.get_config(self.cfgpath)
         self.Weights = self.get_weights(self.wpath)
@@ -115,7 +115,7 @@ class VideoPrediction:
         rects = []
         person_id_list = []
 
-        ct = CentroidTracker(maxDisappeared=50, maxDistance=70)
+        ct = CentroidTracker(maxDisappeared=30, maxDistance=70)
 
         W = None
         H = None
@@ -131,7 +131,7 @@ class VideoPrediction:
                 if frame_counter == 0:
                     cv2.imwrite("media/videos/detections/thumbnails/"+newName.split('.')[0]+".jpg", image)
 
-                if(frame_counter%10 == 0):
+                if(frame_counter%5 == 0):
                     image, rects = self.get_prediction(image, self.nets, W ,H , self.Colors, self.Lables)
                 else:
                     image, person_id_list, live_person_count, total_person_count = self.tracking(image, rects, ct, person_id_list)
@@ -150,53 +150,10 @@ class VideoPrediction:
         video.release()
         out.release()
 
-        detectedVideo = DetectionVideos(user_id=self.getuserId(),video=os.path.join('videos/detections/',newName),thumbnail="videos/detections/thumbnails/"+newName.split('.')[0]+".jpg",date=datetime.datetime.now())
+        detectedVideo = DetectionVideos(videoTitle=newName,user_id=self.getuserId(),video=os.path.join('videos/detections/',newName),thumbnail="videos/detections/thumbnails/"+newName.split('.')[0]+".jpg",date=datetime.datetime.now())
         detectedVideo.save()
         self.setDetectedVideoUrl(detectedVideo.video)
 
-    def feedVideo(self):
-        video = cv2.VideoCapture(self.getfeedURL())
-        # http://cam6284208.miemasu.net/nphMotionJpeg?Resolution=640x480&Quality=Clarity
-        start_time = time.time()
-        total_frames = 0
-        frame_count = 0
-        person_count = 0
-
-        if self.getVideoTitle() is not None:
-            frameOut = cv2.VideoWriter("media/videos/" + str(time.time()) + ".mp4", -1, 20.0, (1080, 720))
-        else:
-            frameOut = cv2.VideoWriter(time.time(), -1, 20.0, (1080, 720))
-
-        while (True):
-            check, image = video.read()
-            image = cv2.resize(image, (1080, 720))
-            #res = self.get_predection(image, self.nets, self.Lables, self.Colors)
-            total_frames = total_frames + 1
-
-            if(frame_count%15 == 0):
-                image,person_count = self.get_predection(image, self.nets, self.Lables, self.Colors)
-            frame_count = frame_count + 1
-
-            end_time = time.time()
-            time_diff = end_time - start_time
-            if time_diff == 0:
-                fps = 0
-            else:
-                fps = total_frames/time_diff
-            fps_text = "FPS: {:.2f}".format(fps)
-
-            cv2.putText(image, fps_text, (10, 20), cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (0, 0, 255), 1)
-            count_txt = "Person Count: {}".format(person_count)
-            cv2.putText(image,count_txt, (10,40),cv2.FONT_HERSHEY_COMPLEX_SMALL,1,(0,0,255),1)
-
-            cv2.imshow("capture", image)
-            frameOut.write(image)
-            key = cv2.waitKey(1)
-            if (key == ord('q')):
-                break
-
-        video.release()
-        cv2.destroyAllWindows()
 
     def get_prediction(self, frame, net, W, H, COLORS, LABELS):
 
@@ -240,8 +197,6 @@ class VideoPrediction:
 
         return frame, rects
 
-
-
     def tracking(self,frame, rects, ct, person_id_list):
         objects = ct.update(rects)
         live_person_count = len(objects)
@@ -249,10 +204,9 @@ class VideoPrediction:
             if objectID not in person_id_list:
                 person_id_list.append(objectID)
             text = "ID {}".format(objectID)
-            cv2.putText(frame, text, (centroid[0] - 10, centroid[1] - 10),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+            cv2.putText(frame, text, (centroid[0] - 10, centroid[1] - 10),cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
             cv2.circle(frame, (centroid[0], centroid[1]), 4, (0, 255, 0), -1)
-            cv2.rectangle(frame, (centroid[0], centroid[1]), (centroid[2], centroid[3]), (255, 0, 0), 2)
+            #cv2.rectangle(frame, (centroid[0], centroid[1]), (centroid[2], centroid[3]), (255, 0, 0), 2)
 
         return frame, person_id_list, live_person_count, len(person_id_list)
 
@@ -370,7 +324,7 @@ class VideoPrediction:
         video.release()
         frameOut.release()
 
-        detectedVideo = DetectionVideos(user_id=self.getuserId(),video=os.path.join('videos/detections/',self.newName),thumbnail="videos/detections/thumbnails/"+self.newName.split('.')[0]+".jpg",date=datetime.datetime.now())
+        detectedVideo = DetectionVideos(videoTitle=self.newName,user_id=self.getuserId(),video=os.path.join('videos/detections/',self.newName),thumbnail="videos/detections/thumbnails/"+self.newName.split('.')[0]+".jpg",date=datetime.datetime.now())
         detectedVideo.save()
         self.setDetectedVideoUrl(detectedVideo.video)
 

@@ -33,9 +33,9 @@ class PersonTracking:
         self.frameQueue = Queue()
         self.detectionQueue = Queue()
         self.finalQueue = Queue()
-        self.labelsPath = "16_02_2021/proj_deep_blue_16_02_2021_names.names"
-        self.cfgpath = "16_02_2021/proj_deep_blue_16_02_2021_cfg_upto_3000.cfg"
-        self.wpath = "16_02_2021/proj_deep_blue_16_02_2021_cfg_best.weights"
+        self.labelsPath = "11_03_2021/obj.names"
+        self.cfgpath = "11_03_2021/custom.cfg"
+        self.wpath = "11_03_2021/custom_best.weights"
         self.Lables = self.get_labels(self.labelsPath)
         self.CFG = self.get_config(self.cfgpath)
         self.Weights = self.get_weights(self.wpath)
@@ -146,9 +146,9 @@ class PersonTracking:
                 text_up_person_count = "Up: " + str(totalUp)
                 text_down_person_count = "Down: " + str(totalDown)
                 text_status = "Down: " + str(status)
-                cv2.putText(frame, text_up_person_count, (20, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
-                cv2.putText(frame, text_down_person_count, (20, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
-                cv2.putText(frame, text_status, (20, 80), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+                cv2.putText(frame, text_up_person_count, (20, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+                cv2.putText(frame, text_down_person_count, (20, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+                cv2.putText(frame, text_status, (20, 80), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
                 frame_counter += 1
 
                 out.write(frame)
@@ -157,8 +157,8 @@ class PersonTracking:
 
         video.release()
         out.release()
-
-        detectedVideo = DetectionVideos(user_id=self.getuserId(),video=os.path.join('videos/detections/',newName),thumbnail="videos/detections/thumbnails/"+newName.split('.')[0]+".jpg",date=datetime.datetime.now())
+        print("Video title issssssssss:",self.getVideoTitle())
+        detectedVideo = DetectionVideos(videoTitle=newName,user_id=self.getuserId(),video=os.path.join('videos/detections/',newName),thumbnail="videos/detections/thumbnails/"+newName.split('.')[0]+".jpg",date=datetime.datetime.now())
         detectedVideo.save()
         self.setDetectedVideoUrl(detectedVideo.video)
 
@@ -275,6 +275,6 @@ class PersonTracking:
             cv2.putText(frame, text, (centroid[0] - 10, centroid[1] - 10),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
             cv2.circle(frame, (centroid[0], centroid[1]), 4, (0, 255, 0), -1)
-            cv2.rectangle(frame, (centroid[0], centroid[1]), (centroid[2], centroid[3]), (255, 0, 0), 2)
+            #cv2.rectangle(frame, (centroid[0], centroid[1]), (centroid[2], centroid[3]), (255, 0, 0), 2)
 
         return frame, trackableObjects, totalUp, totalDown

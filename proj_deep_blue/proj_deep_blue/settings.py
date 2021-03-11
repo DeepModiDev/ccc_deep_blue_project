@@ -34,8 +34,11 @@ INSTALLED_APPS = [
     'ccc14',
     'crispy_forms',
     'django_filters',
+    'django_extensions',
 ]
+
 CRISPY_TEMPLATE_PACK ='bootstrap4'
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -131,3 +134,13 @@ LOGIN_REDIRECT_URL = "home"
 LOGOUT_REDIRECT_URL = "login"
 
 #print('BASE DIR: ',BASE_DIR,'MEDIA_ROOT',MEDIA_ROOT)
+
+# SMTP CONFIGURATIONS
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'mark.robert.20678@gmail.com'
+EMAIL_HOST_PASSWORD = 'cfauqbmhdgrhivvb'
+DEFAULT_FROM_EMAIL = 'CCC14'

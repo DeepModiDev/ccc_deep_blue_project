@@ -1,5 +1,9 @@
 {% extends 'base.html' %}
 
+{% block page_title %}
+  Upload Images
+{% endblock %}
+
 {% block content %}
 
 	{% if errorMessage %}
@@ -13,7 +17,7 @@
 	<div class=" home-div recent-activities card">
 		<div class="row card-header" style="padding: 10px">
 			<h3 class="h4 left-col col-lg-6 d-flex align-items-center justify-content-between">
-				Drag and drop or upload the Images
+				Drag-and-drop / Upload the Images
 			</h3>
 			<div id="imageLoadingView" class="spinner-border" role="status">
 				<span class="sr-only h4">Loading...</span>

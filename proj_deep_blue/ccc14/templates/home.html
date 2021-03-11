@@ -5,23 +5,28 @@
 {% block content %}
 
   {% if message %}
-      <div class="alert alert-danger"> <strong>{{ message }}</strong></div>
+      <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <strong>Message: </strong> <p class="mb-0">{{ message }}</p>
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
   {% endif %}
 
-  {% if form.errors %}
-      {% for field in form %}
+    {% if form.errors %}
+        {% for field in form %}
           {% for error in field.errors %}
               <div class="alert alert-danger">
                   <strong>{{ error|escape }}</strong>
               </div>
           {% endfor %}
-      {% endfor %}
+        {% endfor %}
       {% for error in form.non_field_errors %}
           <div class="alert alert-danger">
               <strong>{{ error|escape }}</strong>
           </div>
       {% endfor %}
-  {% endif %}
+    {% endif %}
 
   <div class="modal fade" id="addUserModel" tabindex="-1" role="dialog" aria-labelledby="addUserModelLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
@@ -46,7 +51,10 @@
     </div>
   </div>
 
-  {% if isSuperUser %}
+
+
+
+  {% if isMallOwner %}
 
       <div class="row bg-white has-shadow" style="margin-bottom: 20px">
         <div class="col-xl-3 col-sm-6">
@@ -54,7 +62,7 @@
             <div class="icon bg-violet"><i class="icon-user"></i></div>
             <div class="title"><span>Users</span>
             </div>
-            <div class="number"><strong>{{ usersCount }}</strong></div>
+            <div class="number"><strong id="totalUsersCount">{{ shopOwnersCount }}</strong></div>
           </div>
         </div>
       </div>
@@ -73,36 +81,43 @@
                       <th>First Name</th>
                       <th>Last Name</th>
                       <th>Username</th>
-                      <th>Super user</th>
-                      <th>Staff member</th>
+                      <th>Admin</th>
                       <th>Last login</th>
                       <th>Date Joined</th>
                       <th>actions</th>
                     </tr>
                   </thead>
-                  <tbody>
-                    {% for user in users %}
-                      <tr id="deleteTableRow-{{user.id}}">
-                        <th scope="row">{{forloop.counter}}</th>
-                        <td>{{user.first_name}}</td>
-                        <td>{{user.last_name}}</td>
-                        <td>{{user.username}}</td>
-                        <td>{{user.is_superuser}}</td>
-                        <td>{{user.is_staff}}</td>
-                        <td>{{user.last_login}}</td>
-                        <td>{{user.date_joined}}</td>
-                        <td>
-                          <div class="row no-padding">
-                            <div class="col">
-                                {% csrf_token %}
-                                <button id="deleteUserBtn-{{user.id}}" class="btn btn-outline-danger" data-url="{% url 'deleteUser' user.id %}" onclick="deleteUserByAdmin('{{ user.id }}')">Delete</button>
-                            </div>
-                            <div class="col">
-                              <button id="deleteUserBtn" type="submit" class="btn btn-outline-success">Edit</button>
-                            </div>
-                          </div>
-                        </td>
-                      </tr>
+                  <tbody id="usersListTableBody">
+                    {% for shopOwner in shopOwners %}
+                        {% if not shopOwner.is_staff %}
+                          <tr id="deleteTableRow-{{shopOwner.pk}}">
+                            <th scope="row">{{forloop.counter}}</th>
+                            <td>{{shopOwner.first_name}}</td>
+                            <td>{{shopOwner.last_name}}</td>
+                            <td>{{shopOwner.username}}</td>
+                            <td>{{shopOwner.is_staff}}</td>
+                            <td>{{shopOwner.last_login}}</td>
+                            <td>{{shopOwner.date_joined}}</td>
+                            <td>
+                              <div class="row no-padding">
+                                <div class="col">
+                                    {% csrf_token %}
+                                    <button id="deleteUserBtn-{{shopOwner.pk}}" class="btn btn-outline-danger" data-url="{% url 'deleteUser' shopOwner.pk %}" onclick="deleteUserByAdmin('{{ shopOwner.pk }}')">Delete</button>
+                                </div>
+<!--                                <div class="col">-->
+<!--                                    {%csrf_token %}-->
+<!--                                    <button type="button" id="editUserBtn-{{shopOwner.pk}}" class="btn btn-outline-success" onclick="editUserForm({{shopOwner.pk}});" data-url="{% url 'editUser' shopOwner.pk %}">Edit</button>-->
+<!--                                </div>-->
+                                <div class="col">
+                                  <form method="get" action="{% url 'editUser' shopOwner.pk %}" enctype="multipart/form-data">
+                                    {% csrf_token %}
+                                    <input class="btn btn-outline-success" type="submit" value="edit"/>
+                                  </form>
+                                </div>
+                              </div>
+                            </td>
+                          </tr>
+                        {% endif %}
                     {% endfor %}
                   </tbody>
                 </table>

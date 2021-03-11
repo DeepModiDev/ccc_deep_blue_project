@@ -1,6 +1,11 @@
 {% extends 'base.html' %}
 
 {% load crispy_forms_tags %}
+
+{% block page_title %}
+  History
+{% endblock %}
+
 {% block content %}
 
     {% if errorMessage %}
@@ -15,61 +20,63 @@
         <div class="recent-activities card">
             <div class="card-header">
                 <h3 class="h4">
-                    History
+                    My Videos
                 </h3>
             </div>
 
             <div>
                 {% if video_filter %}
                     <form method="GET" class="align-items-center card-header d-flex">
-                        <div class="col">
-                            {{ video_filter.form|crispy }}
-                        </div>
-                        <div class="col" style="margin-left:auto; ">
-                            <input type="submit" class="btn btn-primary"/>
-                        </div>
+                      {% for field in video_filter.form %}
+                        <div class="col-5">{{ field|as_crispy_field }}</div>
+                      {% endfor %}
+                        <input type="submit" style="margin-top:15px;" class="btn btn-primary"/>
                     </form>
-                {% endif %}
+                    {% endif %}
             </div>
-
-            <video id="videoPlayerView" class="img-fluid video-view"  controls>
-                <source src="" type="video/mp4"/>
-            </video>
+            <div id="videoPlayerContainer" style="padding:20px;">
+                    <button id="videoCloseBtn" type="button" class="btn btn-primary" style="margin-left:auto;" onclick="closeVideoPlayer();">
+                            <span>&times;</span>
+                    </button>
+                    <video id="videoPlayerView" class="img-fluid video-view"  controls="controls">
+                        <source src="" type="video/mp4"/>
+                    </video>
+            </div>
             {% if videos %}
             {% for video in videos %}
-                <div class="container-fluid">
-                    <div class="row">
-                        <div class="col-lg-4 no-padding">
-                            <div  class="image col-md-7">
-                                <a href="{{ video.videoURL }}" style="text-decoration: none" download>
-                                    <img style="border-radius: 8px" class="img-fluid" src="{{ video.videoThumbnail }}" alt="None"/>
-                                </a>
-                            </div>
-                        </div>
-                        <div class="col-lg-4 no-padding">
-                            <div class="text" style="margin: 5px">
-                                    <p>{{video.videoTitle}}</p>
-                                    <p>{{video.date}}</p>
-                            </div>
-                        </div>
-                        <div class="col-lg-4 no-padding">
-                            <div class="row no-padding">
-                                <div class="col-4">
-                                    <button class="playVideoButton btn btn-outline-success" id="{{ video.videoTitle }}">Play</button>
+                 <div  class="item no-padding">
+                        <div class="container-fluid">
+                          <div id="deleteUserVideoRow-{{video.videoId}}" class="row">
+
+                              <div class="col-lg-3 date-holder">
+                                <div class="no-padding">
+                                  <a href="{{ video.videoURL }}" style="text-decoration: none; padding:20px;">
+                                    <img style="border-radius:8px;" class="img-fluid" src="{{ video.videoThumbnail }}" alt="None"/>
+                                  </a>
                                 </div>
-                                <div class="col-4 no-padding">
-                                    <form method="post" action="{% url 'deleteVideo' video.videoId %}">
-                                        {% csrf_token %}
-                                        <button type="submit" class="btn btn-outline-danger" >Delete</button>
-                                    </form>
+                              </div>
+
+                              <div class="col-lg-5" style="text-align: left;">
+                                <p style="font-size: 14px; color: black;"><b>Name: </b> {{video.videoTitle}}</p>
+                                <p style="font-size: 14px; color: black;"><b>Date: </b> {{ video.date.date}}<b>&nbsp;&nbsp;&nbsp;Time: </b> {{video.date.time}}</p>
+                              </div>
+
+                            <div class="col-lg-4">
+                              <div class="row no-padding">
+                                <div class="col-md-5">
+                                  <a href="{{ video.videoURL }}" class="btn btn-outline-primary" style="text-decoration: none"download>Download</a>
                                 </div>
-                                <div class="col-4 no-padding">
-                                    <a href="{{ video.videoURL }}" class="btn btn-outline-primary" style="text-decoration: none"download>Download</a>
+                                <div class="col-md-3">
+                                  <button id="videoForPlayBtn-{{ video.videoId }}" class="playVideoButton btn btn-outline-success" onclick="playVideo('{{ video.videoTitle }}',{{ video.videoId }});">Play</button>
                                 </div>
+                                <div class="col-md-4">
+                                  {% csrf_token %}
+                                  <button id="deleteMyVideoByUserBtn-{{ video.videoId }}" class="btn btn-outline-danger" onclick="deleteVideoByUser('{{ video.videoId }}');" data-url="{% url 'deleteVideo' video.videoId %}">Delete</button>
+                                </div>
+                              </div>
                             </div>
                         </div>
                     </div>
-                </div>
             {% endfor %}
             {% else %}
                 <p><b><center>No history found</center></b></p>

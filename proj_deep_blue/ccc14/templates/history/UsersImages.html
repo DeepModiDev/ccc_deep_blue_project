@@ -2,9 +2,13 @@
 
 {% load crispy_forms_tags %}
 
+{% block page_title %}
+  History
+{% endblock %}
+
 {% block content %}
 
-{% if isSuperUser %}
+{% if isMallOwner %}
      <!-- ListView Images -->
       <div class="recent-activities card">
         <div class="card-header d-flex">

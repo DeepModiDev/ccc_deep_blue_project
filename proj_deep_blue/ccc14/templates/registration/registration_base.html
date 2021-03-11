@@ -66,8 +66,6 @@
           <h1 class="h4">
             {% if user.is_authenticated %} 
               <a class="navbar-brand" href="{% url 'home' %}"> {{ user.username }} </a>
-            {% else %}
-              <h6>Unknown</h6>
             {% endif %}
             <br>
             {% if user.is_authenticated %}

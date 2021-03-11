@@ -1,51 +1,39 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import (render, redirect)
 import os
 import datetime
 from .imagePrediction import ImagePrediction
 from .videoPrediction import VideoPrediction
 from .PersonTracking import PersonTracking
-from .models import Images, Videos, ImageDetails,DetectionVideos
-from django.contrib.auth.forms import UserCreationForm
+from .models import (Images, Videos, ImageDetails,MallOwnerShopOwner)
+from django.contrib.auth.forms import (UserCreationForm)
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 from .forms import CustomUserCreationForm,CustomUserChageForm
-from django.http import JsonResponse
-from django.core.serializers import serialize 
+from django.http import JsonResponse,HttpResponseRedirect
+from django.http.response import StreamingHttpResponse
+from .Camera import VideoCamera
 
 @login_required(login_url='/accounts/login/')
 def home(request):
     context = {}
-    count = User.objects.count()
-    if request.user.is_superuser:
-        users = User.objects.all()
-        context['users'] = users
-        context['isSuperUser'] = True
-        context['usersCount'] = count
+    users = []
+    if request.user.is_staff:
+        mallOwnerShopOwners = MallOwnerShopOwner.objects.all()
+        for owners in mallOwnerShopOwners:
+            if(owners.mallOwner.pk == request.user.pk):
+                user = User.objects.get(pk=owners.shopOwner.pk)
+                users.append(user)
+
+        context['shopOwners'] = users
+        context['mallOwner'] = request.user
+        context['isMallOwner'] = True
+        context['shopOwnersCount'] = len(users)
         context['form'] = CustomUserCreationForm()
+        return render(request, 'home.html', context)
     else:
-        context['count'] = count
-        context['isVisible'] = False
-        context['usersCount'] = count
-
-    return render(request, 'home.html',context)
-
-
-
-#Task is is progress....... 
-@login_required(login_url='/accounts/login/')
-def profile(request):
-    context = {}
-    # if request.method == 'POST':
-    #     p_form = UserUpdateForm(request.POST,instance=request.user)
-    #     context['p_form'] = p_form
-    #     context["user"] = request.user
-    #     if p_form.is_valid():
-    #         p_form.save()
-    #         return redirect("home/profile")
-    # if request.method == 'GET':
-    #     context["user"] = request.user
-    return render(request,"profile.html",context)
+        context['isMallOwner'] = False
+        return render(request, 'upload.html', context)
 
 # Delete user task done...
 @login_required(login_url='/accounts/login/')
@@ -72,14 +60,14 @@ def addUser(request):
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
-            form.save()
+            #form = form.save(commit=False)
+            #form.parentUser_id = request.user.pk
+            savedForm = form.save()
+            shopOwner = User.objects.get(id=savedForm.pk)
+            mallOwnerShopOwner = MallOwnerShopOwner(mallOwner=request.user,shopOwner=shopOwner)
+            mallOwnerShopOwner.save()
             errors.append("User created successfully.")
             context['created'] = True
-            if len(form.errors) > 0:
-                for field in form:
-                    for error in field.errors:
-                        errors.append(error)
-            
             context['message'] = errors
             return JsonResponse(context)
         else:
@@ -92,24 +80,32 @@ def addUser(request):
             context['message'] = errors
             return JsonResponse(context)
 
-
 @login_required(login_url='/account/login/')
 @staff_member_required
-def editUser(request,pk):
+def edit_user(request,pk):
     context = {}
-    if request.method == "POST":
-        user = User.objects.get(pk=pk)
-        form = CustomUserChageForm(request.POST,user)
-        
-    else:
-        context['message'] = "Unable to edit."
-        return JsonResponse(context)
+    if request.method == 'POST':
+        user = User.objects.get(id=pk)
+        form = CustomUserChageForm(request.POST,instance=user)
+        if form.is_valid():
+            form.save()
+            context['message'] = "Changes saved successfully."
 
+            return HttpResponseRedirect('/home')
+        else:
+            context['message'] = "Something went wrong!!! try again later."
+            return HttpResponseRedirect('/home')
+    else:
+        context = {}
+        user = User.objects.get(id=pk)
+        form = CustomUserChageForm(instance=user)
+        context['form'] = form
+        return render(request,'registration/editUserForm.html',context)
 
 def signup(request):
     if request.user.is_superuser:
         if request.method == "POST":
-            form = UserCreationForm(request.POST)
+            form = CustomUserCreationForm(request.POST)
             if form.is_valid():
                 form.save()
                 return redirect("login")
@@ -181,6 +177,7 @@ def video(request):
     isValidMessage = []
 
     if request.method == 'POST':
+
         uploaded_file = request.FILES['document']
 
         if validatorVideo(uploaded_file.name):
@@ -196,7 +193,7 @@ def video(request):
                 videoPrediction.setVideoTitle(video.video.name.split('/')[1])
                 videoPrediction.setvideoURL(os.path.join(os.getcwd(), 'media/', video.video.name))
                 videoPrediction.setuserId(currentUser.pk)
-                videoPrediction.ControlledThreading()
+                videoPrediction.caller()
 
                 video.delete()
                 context['processedVideoUrl'] = videoPrediction.getDetectedVideoUrl()
@@ -214,16 +211,6 @@ def video(request):
 
     if request.method == 'GET':
         return render(request, 'video.html')
-
-@login_required(login_url='/accounts/login/')
-def feedURL(request):
-    context = {}
-    if request.method == 'POST':
-        feededURL = request.POST['feedURL']
-        feedPrediction = VideoPrediction()
-        feedPrediction.setfeedURL(feededURL)
-        feedPrediction.feedVideo()
-    return render(request, 'video.html', context)
 
 @login_required(login_url='/accounts/login/')
 def person_tracking(request):
@@ -266,9 +253,8 @@ def person_tracking(request):
         return render(request, 'video.html', context)
 
     if request.method == 'GET':
-        return render(request, 'video.html')
-
-
+        context['footFallCounter'] = True
+        return render(request, 'video.html',context)
 
 def validator(fileName):
     extensions = [".jpeg", ".jpg", ".png", ".PNG", ".JPG", ".JPEG", ".webp", ".WEBP"]
@@ -320,3 +306,52 @@ def load_videos():
         'videos': videos,
     }
     return context
+
+def gen(WebStream):
+    while True:
+        frame = WebStream.get_frame()
+        yield (b'--frame\r\n' 
+               b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
+
+@login_required(login_url='/accounts/login/')
+def webcam_feed(request):
+    context = {}
+    url = None
+    if request.method == 'POST':
+        url = request.POST['feedURL']
+        url = url.split('/')
+        context['protocol'] = url[0]
+        context['address'] = url[2]
+        return JsonResponse(context)
+    else:
+        return render(request,'LiveVideoFeed.html')
+
+def trial_gen(camera):
+    while True:
+        frame = camera.get_frame()
+        yield (b'--frame\r\n'
+               b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
+
+def trial_feed(request,link):
+    return StreamingHttpResponse(gen(VideoCamera('http://'+link+'/video/mjpeg')),content_type='multipart/x-mixed-replace; boundary=frame')
+
+
+
+'''
+Please dont delete these comments they are very important for the future
+
+ below code will help us to convert image frame into base64 string and return response as a JsonResponse
+ important line is image_data = base64.b64encode(image).decode('utf-8')
+ 
+            video = cv2.VideoCapture(url)
+            if video.isOpened():
+                while True:
+                    (ret,frame) = video.read()
+                    if not ret:
+                        break
+                    image = cv2.imencode('.jpg', frame)[1].tobytes()
+                    image_data = base64.b64encode(image).decode('utf-8')
+                    context['images'] = image_data
+                video.release()
+                cv2.destroyAllWindows()
+'''

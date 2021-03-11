@@ -4,11 +4,11 @@ import time
 import numpy as np
 
 YOLO_V4_PATH = os.path.join(os.getcwd(), "yolo_v4")
-CONF_THRES = 0.30 # minimum probability to filter weak detections
+CONF_THRES = 0.50 # minimum probability to filter weak detections
 NMS_THRES = 0.30   # threshold when applyong non-maxima suppression
-LABELS = "16_02_2021/proj_deep_blue_16_02_2021_names.names"
-CFG = "16_02_2021/proj_deep_blue_16_02_2021_cfg_upto_3000.cfg"
-WEIGHTS = "16_02_2021/proj_deep_blue_16_02_2021_cfg_best.weights"
+LABELS = "11_03_2021/obj.names"
+CFG = "11_03_2021/custom.cfg"
+WEIGHTS = "11_03_2021/custom_best.weights"
 
 # karan_custom_23_01_21.cfg
 # karan_custom_best_23_01_21.weights

@@ -1,5 +1,9 @@
 {% extends 'base.html' %}
 
+{% block page_title %}
+  Upload Video / Camera Live Feed
+{% endblock %}
+
 {% block content %}
 
 {% if errorMessage %}
@@ -9,6 +13,15 @@
     {% endfor %}
 {% endif %}
 
+{% if footFallCounter %}
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <strong>Footfall Counter: </strong> <p class="mb-0">Count the number of people that pass through a certain passage or entrance.</p>
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+{% endif %}
+
 <div class="align-items-center justify-content-center no-padding" style="padding: 10px">
     <div class=" home-div recent-activities card">
         <div class="row card-header" style="padding: 10px">
@@ -16,9 +29,9 @@
                 Upload Video or Enter URL
             </h3>
             <div id="loadingView" class="spinner-border" role="status">
-                <span class="sr-only h4">Loading...</span>
+                <span class="sr-only h4">Processing...</span>
             </div>
-                <h4 style="margin-left: 10px; margin-top: 5px" class="col align-items-center" id="LoadingText">Loading...</h4>
+                <h4 style="margin-left: 10px; margin-top: 5px" class="col align-items-center" id="LoadingText">Processing...</h4>
         </div>
         <div class="card-body">
             <div class="item">
@@ -28,12 +41,6 @@
                     <button id="uploadVideoBtn"  type="submit" class="btn btn-outline-primary">
                         Upload Video
                     </button>
-                </form>
-                <p> or </p>
-                <form method="post" action="/feed/">
-                    {% csrf_token %}
-                    <input  type="text" placeholder="Enter URL" class="btn btn-outline-primary" name="feedURL" required>
-                    <button type="submit" class="btn btn-outline-primary" onclick="ClearForm()"> GO</button>
                 </form>
             </div>
         </div>
@@ -55,11 +62,6 @@
             </div>
         </div>
      {% endif %}
+
 </div>
-
-<script>
-    $(document).ready(function() {
-
-    });
-</script>
 {% endblock %}
