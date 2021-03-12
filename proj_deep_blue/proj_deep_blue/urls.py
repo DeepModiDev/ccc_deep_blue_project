@@ -15,7 +15,7 @@ urlpatterns = [
     path('upload/', views.upload, name='upload'), #for uploading the images
     path('video/',views.video,name='video'),#for uploading the videos
     path('video/feed/',views.webcam_feed,name='webcam_feed'),
-    path('video/trial/feed/<str:link>',views.trial_feed,name='trial_feed'),
+    path('video/trial/feed/<link>/',views.trial_feed,name='trial_feed'),
     path('person-tracking/',views.person_tracking,name='person-tracking'),
     path('admin/', admin.site.urls),    #Admin Url
     path('accounts/', include('django.contrib.auth.urls')), # for login

@@ -127,6 +127,8 @@ class ImagePrediction:
                 cv2.putText(image, text, (x, y - 5), cv2.FONT_HERSHEY_SIMPLEX,0.5, color, 2)
                 if (self.labels[classIDs[i]] == "head"):
                     person_counter += 1
+                if (self.labels[classIDs[i]] == "mannequin_head"):
+                    mannequin_count += 1
 
         person_count_txt = "Person Count: {}".format(person_counter)
         mannequin_count_txt = "Mannequin Count: {}".format(mannequin_count)

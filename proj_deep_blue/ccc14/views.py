@@ -13,6 +13,8 @@ from .forms import CustomUserCreationForm,CustomUserChageForm
 from django.http import JsonResponse,HttpResponseRedirect
 from django.http.response import StreamingHttpResponse
 from .Camera import VideoCamera
+from urllib.parse import urlparse
+import gc
 
 @login_required(login_url='/accounts/login/')
 def home(request):
@@ -300,12 +302,30 @@ def convert_bytes(bytes_number):
 
     return (round(double_bytes, 2), tags[i])
 
-def load_videos():
-    videos = Videos.objects.all()
-    context = {
-        'videos': videos,
-    }
-    return context
+@login_required(login_url='/accounts/login/')
+def webcam_feed(request):
+    context = {}
+    url = None
+    if request.method == 'POST':
+        url = request.POST.get('feedURL',None)
+        stopLiveFeed = request.POST.get('stopFeedBool',False)
+        if stopLiveFeed == False:
+            url = url.strip()
+            urlObj = urlparse(url)
+            context['scheme'] = urlObj.scheme
+            context['netloc'] = urlObj.netloc
+            context['path'] = urlObj.path
+            context['parms'] = urlObj.params
+            context['query'] = urlObj.query
+            context['framgment'] = urlObj.fragment
+            context['username'] = urlObj.username
+            context['password'] = urlObj.password
+            return JsonResponse(context)
+        else:
+            context['stopFeedBool'] = True
+            return JsonResponse(context)
+    else:
+        return render(request,'LiveVideoFeed.html')
 
 def gen(WebStream):
     while True:
@@ -314,26 +334,20 @@ def gen(WebStream):
                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
 
 @login_required(login_url='/accounts/login/')
-def webcam_feed(request):
-    context = {}
-    url = None
-    if request.method == 'POST':
-        url = request.POST['feedURL']
-        url = url.split('/')
-        context['protocol'] = url[0]
-        context['address'] = url[2]
-        return JsonResponse(context)
-    else:
-        return render(request,'LiveVideoFeed.html')
-
-def trial_gen(camera):
-    while True:
-        frame = camera.get_frame()
-        yield (b'--frame\r\n'
-               b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
-
 def trial_feed(request,link):
-    return StreamingHttpResponse(gen(VideoCamera('http://'+link+'/video/mjpeg')),content_type='multipart/x-mixed-replace; boundary=frame')
+    if link.find('true') == -1:
+        print("is Link null:",link)
+        (scheme,netloc,*path) = link.split('_')
+        joinedPath = ""
+        for _ in path:
+            joinedPath += _+'/'
+        print("Joined String: ",scheme+'://'+netloc+'/'+joinedPath)
+
+        return StreamingHttpResponse(gen(VideoCamera(scheme + '://' + netloc + '/' + joinedPath,request.user.pk)), content_type='multipart/x-mixed-replace; boundary=frame')
+    else:
+        gc.collect()
+        print("gc called..")
+        return HttpResponseRedirect('/video/feed/')
 
 
 

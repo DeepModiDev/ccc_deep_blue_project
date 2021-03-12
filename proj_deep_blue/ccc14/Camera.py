@@ -1,29 +1,30 @@
 import cv2
 import os
-os.environ['TF_FORCE_GPU_ALLOW_GROWTH'] = 'true'
 import numpy as np
 import time
-confthres = 0.30 # confidence threshold value
+confthres = 0.50 # confidence threshold value
 nmsthres = 0.30
 yolo_path = os.path.join(os.getcwd(), "yolo_v4")
 from .centroidtracker import CentroidTracker
-
+import datetime
+from .models import DetectionVideos
+from django.utils.timezone import get_current_timezone
+from datetime import datetime
 
 class VideoCamera(object):
-    def __init__(self,url):
-        # Using OpenCV to capture from device 0. If you have trouble capturing
-        # from a webcam, comment the line below out and use a video file
-        # instead.
-        self.video = cv2.VideoCapture(url)
+    def __init__(self,url,userId):
+        self.url = url
+        self.video = cv2.VideoCapture(self.url)
         self.ct = CentroidTracker(maxDisappeared=30, maxDistance=70)
         self.total_person_count = 0
         self.live_person_count = 0
         self.frame_counter = 0
         self.rects = []
         self.person_id_list = []
-        # If you decide to use video.mp4, you must have this file in the folder
-        # as the main.py.
-        # self.video = cv2.VideoCapture('video.mp4')
+        self.currentTime = datetime.now(tz=get_current_timezone())
+        self.newName = str(self.currentTime.day) + "_" + str(self.currentTime.month) + "_" + str(self.currentTime.year) \
+                       + "_" + str(self.currentTime.second) + str(self.currentTime.microsecond) + ".mp4"
+        self.userId = userId
         self.labelsPath = "11_03_2021/obj.names"
         self.cfgpath = "11_03_2021/custom.cfg"
         self.wpath = "11_03_2021/custom_best.weights"
@@ -32,6 +33,12 @@ class VideoCamera(object):
         self.Weights = self.get_weights(self.wpath)
         self.nets = self.load_model(self.CFG, self.Weights)
         self.Colors = self.get_colors(self.Lables)
+        self.out = cv2.VideoWriter('media/videos/detections/'+self.newName,-1,30.0, (1080,720))
+        self.detectedVideo = DetectionVideos(videoTitle=self.newName, user_id=self.userId,
+                        video=os.path.join('videos/detections/', self.newName),
+                        thumbnail="videos/detections/thumbnails/" + self.newName.split('.')[0] + ".jpg",
+                        date=datetime.now(tz=get_current_timezone()))
+        self.countData = {}
 
     def get_colors(self, LABELS):
         # initialize a list of colors to represent each possible class label
@@ -65,33 +72,35 @@ class VideoCamera(object):
 
     def __del__(self):
         self.video.release()
+        self.out.release()
+        self.detectedVideo.save()
 
     def get_frame(self):
         success, image = self.video.read()
-        # We are using Motion JPEG, but OpenCV defaults to capture raw images,
-        # so we must encode it into JPEG in order to correctly display the
-        # video stream.
 
         W = None
         H = None
 
-        if success != False:
+        if success:
             image = cv2.resize(image, (1080, 720))
 
             if W is None or H is None:
                 (H, W) = image.shape[:2]
 
-            if (self.frame_counter % 15 == 0):
+            if self.frame_counter == 0:
+                cv2.imwrite("media/videos/detections/thumbnails/" + self.newName.split('.')[0] + ".jpg", image)
+
+
+            if (self.frame_counter % 5 == 0):
                 (image, self.rects) = self.get_prediction(image, self.nets, W, H, self.Colors, self.Lables)
             else:
                 (image, self.person_id_list, self.live_person_count, self.total_person_count) = self.tracking(image)
 
             text_live_person_count = "Live Person Count: " + str(self.live_person_count)
-            text_total_person_count = "Total Person Count: " + str(self.total_person_count)
 
             cv2.putText(image, text_live_person_count, (20, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
-            cv2.putText(image, text_total_person_count, (20, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
             self.frame_counter += 1
+            self.out.write(image)
 
         ret, jpeg = cv2.imencode('.jpg', image)
         return jpeg.tobytes()
