@@ -34,14 +34,17 @@
                     </form>
                     {% endif %}
             </div>
-            <div id="videoPlayerContainer" style="padding:20px;">
-                    <button id="videoCloseBtn" type="button" class="btn btn-primary" style="margin-left:auto;" onclick="closeVideoPlayer();">
-                            <span>&times;</span>
-                    </button>
-                    <video id="videoPlayerView" class="img-fluid video-view"  controls="controls">
-                        <source src="" type="video/mp4"/>
-                    </video>
+
+            <div id="videoPlayerContainer">
+                <button id="videoCloseBtn" type="button" class="btn btn-primary" style="margin-left:auto;"
+                        onclick="closeVideoPlayer();">
+                    <span>&times;</span>
+                </button>
+                <video id="videoPlayerView" playsinline controls>
+                    <source src="" type="video/mp4"/>
+                </video>
             </div>
+
             {% if videos %}
             {% for video in videos %}
                  <div  class="item no-padding">
@@ -82,5 +85,6 @@
                 <p><b><center>No history found</center></b></p>
             {% endif %}
         </div>
+    </div>
     </div>
 {% endblock %}

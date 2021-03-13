@@ -8,8 +8,7 @@ yolo_path = os.path.join(os.getcwd(), "yolo_v4")
 from .centroidtracker import CentroidTracker
 import datetime
 from .models import DetectionVideos
-from django.utils.timezone import get_current_timezone
-from datetime import datetime
+import datetime
 
 class VideoCamera(object):
     def __init__(self,url,userId):
@@ -21,7 +20,7 @@ class VideoCamera(object):
         self.frame_counter = 0
         self.rects = []
         self.person_id_list = []
-        self.currentTime = datetime.now(tz=get_current_timezone())
+        self.currentTime = datetime.datetime.now()
         self.newName = str(self.currentTime.day) + "_" + str(self.currentTime.month) + "_" + str(self.currentTime.year) \
                        + "_" + str(self.currentTime.second) + str(self.currentTime.microsecond) + ".mp4"
         self.userId = userId
@@ -33,11 +32,11 @@ class VideoCamera(object):
         self.Weights = self.get_weights(self.wpath)
         self.nets = self.load_model(self.CFG, self.Weights)
         self.Colors = self.get_colors(self.Lables)
-        self.out = cv2.VideoWriter('media/videos/detections/'+self.newName,-1,30.0, (1080,720))
+        self.out = cv2.VideoWriter('media/videos/detections/'+self.newName,-1,25.0, (1080,720))
         self.detectedVideo = DetectionVideos(videoTitle=self.newName, user_id=self.userId,
                         video=os.path.join('videos/detections/', self.newName),
                         thumbnail="videos/detections/thumbnails/" + self.newName.split('.')[0] + ".jpg",
-                        date=datetime.now(tz=get_current_timezone()))
+                        date=datetime.datetime.now())
         self.countData = {}
 
     def get_colors(self, LABELS):

@@ -122,6 +122,7 @@ def upload(request):
     urlsList = []
     predictedDataDetails = []
     isValidMessage = []
+    imageNames = []
 
     if request.method == 'POST':
         uploaded_file = request.FILES.getlist("document")
@@ -144,9 +145,12 @@ def upload(request):
                     imagePrediction = ImagePrediction()
 
                     imagePrediction.get_predection(os.path.join(os.getcwd(), 'media/', newName))
+
                     predictedDataDetails.append("Mannequin found: " + str(
                         imagePrediction.getPredictedMannequinCount()) + ",  Person found: " + str(
                         imagePrediction.getPredictedPersonCount()))
+                    imageNames.append(savingImage.imageTitle)
+
                     urlsList.append(newName)
 
                     imageDetails = ImageDetails(image=savingImage,imageDetails="Mannequin found: " + str(
@@ -163,8 +167,7 @@ def upload(request):
                                        'items': "Problem with:" + image.name})
 
         context = {
-            "url": [{"link": "/media/" + item, "itemId": index} for index, item in enumerate(urlsList)],
-            "predictedData": [{"outputData": item, "itemId": index} for index, item in enumerate(predictedDataDetails)],
+            "data": zip([{"link": "/media/" + item, "itemId": index} for index, item in enumerate(urlsList)],[{"outputData": item, "itemId": index} for index, item in enumerate(predictedDataDetails)],[{"title": item, "itemId": index} for index, item in enumerate(imageNames)]),
             "errorMessage": isValidMessage
         }
         return render(request, 'upload.html', context)
@@ -212,6 +215,7 @@ def video(request):
         return render(request, 'video.html', context)
 
     if request.method == 'GET':
+        gc.collect()
         return render(request, 'video.html')
 
 @login_required(login_url='/accounts/login/')

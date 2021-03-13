@@ -22,40 +22,49 @@
 			<div id="imageLoadingView" class="spinner-border" role="status">
 				<span class="sr-only h4">Loading...</span>
 			</div>
-			<h4  id="imageLoadingText" style="margin-left: 10px; margin-top: 5px" class="col align-items-center">Loading...</h4>
+			<h4 id="imageLoadingText" style="margin-left: 10px; margin-top: 5px" class="col align-items-center">
+				Loading...</h4>
 		</div>
 		<div class="card-body">
 			<div class="item">
 				<div style="width: 100%; display: flex; flex-direction: column; justify-content: center;">
-					<form class="dz" method="post" enctype="multipart/form-data" >
+					<form class="dz" method="post" enctype="multipart/form-data">
 						{% csrf_token %}
-						<input class="custom-card" id="imageChooser" type="file" accept="image/*" name="document" onchange="(form.submit() & showProgress());"  multiple required>
+						<input class="custom-card" id="imageChooser" type="file" accept="image/*" name="document"
+							   onchange="(form.submit() & showProgress());" multiple required>
 					</form>
 				</div>
 			</div>
 		</div>
-
-		{% if url %}
-			{% for data in url %}
-				<hr style="border: 1px dashed gray">
-				{% if predictedData %}
-					{% for subData in predictedData %}
-						{% if subData.itemId == data.itemId %}
-							<span>{{ subData.outputData}}</span>
-						{% endif %}
-					{% endfor %}
-				{% endif %}
-
-				<div class="">
-					<p>
-						<a href="{{ data.link }}" target="_blank">
-							<img id="image" class="img-fluid" src="{{ data.link }}"/>
-						</a>
-					</p>
-				</div>
-
-			{% endfor %}
-		{% endif %}
 	</div>
+	{% if data %}
+	<div class="home-div recent-activities card">
+		<div class="row card-header" style="padding: 10px">
+			<h3 class="h4 left-col col-lg-6 d-flex align-items-center justify-content-between">
+				Result
+			</h3>
+		</div>
+		<div class="item">
+		{% for urlList,detailsList,namesList in data %}
+			<div class="container-fluid no-padding">
+				<div class="row">
+
+					<div class="col-lg-6 no-padding date-holder">
+						<a href="{{ urlList.link }}" target="_blank"><img class="img-fluid"
+																		  style='object-fit: scale-down; max-height: 300px; max-width:450px;'
+																		  src="{{ urlList.link }}"/></a>
+					</div>
+					<div class="col-lg-4" style="text-align: left;">
+						<p style="font-size: 14px; color: black;"><b>Name: </b>{{ namesList.titles }}</p>
+						<p style="font-size: 14px; color: black;"><b>Details: </b>{{ detailsList.outputData }}</p>
+					</div>
+
+				</div>
+			</div>
+			<hr style="border: 1px dashed gray">
+			{% endfor %}
+		</div>
+	</div>
+	{% endif %}
 </div>
 {% endblock %}

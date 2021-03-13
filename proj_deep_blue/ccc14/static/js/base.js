@@ -31,8 +31,12 @@
 //         alert("Doesn't Work");
 //     }
 // }
+ const player = new Plyr('#videoPlayerView');
+ const processedVideoPlayer = new Plyr('#processedVideoPlayer');
+
 
 $(document).ready(function () {
+
 
     $('#imageLoadingView').hide();
     $('#imageLoadingText').hide();
@@ -120,6 +124,8 @@ function deleteVideoByUser(id){
             success: function(data){
                 if(data.deleted){
                     $('#deleteUserVideoRow-'+id).remove();
+                    $("#videoPlayerView").hide();
+                    $('#videoPlayerContainer').hide();
                 }
             }
         });
@@ -165,6 +171,8 @@ function deleteVideoByAdmin(id){
             success: function(data){
                 if(data.deleted){
                     $("#userUploadedVideoRow-"+id).remove();
+                    $("#videoPlayerView").hide();
+                    $('#videoPlayerContainer').hide();
                 }
             },
         });
@@ -247,7 +255,6 @@ function liveFeedVideoURL(){
         },
     });
 }
-
 
 function stopLiveFeed(){
     var csrf_token = $("input[name=csrfmiddlewaretoken]").val();

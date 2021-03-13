@@ -53,13 +53,9 @@
                     Result
                 </h3>
             </div>
-            <div class="card-body">
-                <div class="item" class="video-view" >
-                    <video name='demo' controls>
-                        <source src="{{ processedVideoUrl.url }}" type="video/mp4"/>
-                    </video>
-                </div>
-            </div>
+            <video id="processedVideoPlayer" controls="controls" crossorigin="anonymous" playsinline>
+                <source src="{{ processedVideoUrl.url }}" type="video/mp4"/>
+            </video>
         </div>
      {% endif %}
 

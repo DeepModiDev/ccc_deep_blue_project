@@ -21,6 +21,10 @@
   <link rel="stylesheet" href="{% static 'css/style.default.css' %}" id="theme-stylesheet">
   <!-- Favicon-->
   <link rel="shortcut icon" href="{% static 'img/icon_ccc.png' %}">
+  <!-- Video.js -->
+<!--  <link href="https://vjs.zencdn.net/7.10.2/video-js.css" rel="stylesheet" />-->
+    <script src="https://cdn.plyr.io/3.6.4/plyr.js"></script>
+    <link rel="stylesheet" href="https://cdn.plyr.io/3.6.4/plyr.css" />
 
   <title>{% block title %}Home{% endblock %}</title>
 </head>
@@ -136,5 +140,6 @@
     <!-- Main File-->
     <script src="{% static 'js/front.js' %}"></script>
     <script src="{% static 'js/base.js' %}"></script>
+<!--    <script src="https://vjs.zencdn.net/7.10.2/video.min.js"></script>-->
 </body>
 </html>
