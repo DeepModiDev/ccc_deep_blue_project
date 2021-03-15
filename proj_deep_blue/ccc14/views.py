@@ -280,7 +280,7 @@ def validatorVideo(fileName):
 
 def sizeValidator(fileSize):
     size, type = convert_bytes(fileSize)
-    tags = {"Byte": 1e+7, "Kilobyte": 10000, "Megabyte": 10, "Gigabyte": 0.01, "Terabyte": 1e-5}
+    tags = {"Byte": 1e+7, "Kilobyte": 10000, "Megabyte": 30, "Gigabyte": 0.01, "Terabyte": 1e-5}
     if tags[type] >= size:
         return (True, type, tags[type])
     else:
@@ -333,7 +333,8 @@ def webcam_feed(request):
 
 def gen(WebStream):
     while True:
-        frame = WebStream.get_frame()
+        (livecount,frame) = WebStream.get_frame()
+        print("Live count is: ",livecount)
         yield (b'--frame\r\n' 
                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
 

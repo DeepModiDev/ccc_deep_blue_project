@@ -139,8 +139,8 @@ class VideoPrediction:
                 text_live_person_count = "Live Person Count: " + str(live_person_count)
                 text_total_person_count = "Total Person Count: " + str(total_person_count)
 
-                cv2.putText(image, text_live_person_count, (20, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
-                cv2.putText(image, text_total_person_count, (20, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+                cv2.putText(image, text_live_person_count, (20, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.75, (0, 0, 255), 3)
+                #cv2.putText(image, text_total_person_count, (20, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
                 frame_counter += 1
 
                 out.write(image)
@@ -191,9 +191,9 @@ class VideoPrediction:
                 rects.append([x, y, x + w, y + h])
                 color = [int(c) for c in COLORS[classIDs[i]]]
                 cv2.rectangle(frame, (x, y), (x + w, y + h), color, 2)
-                text = "{}: {:.4f}".format(LABELS[classIDs[i]], confidences[i])
-                cv2.putText(frame, text, (x, y - 5),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+                # text = "{}: {:.4f}".format(LABELS[classIDs[i]], confidences[i])
+                # cv2.putText(frame, text, (x, y - 5),
+                #             cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
 
         return frame, rects
 
@@ -204,8 +204,8 @@ class VideoPrediction:
             if objectID not in person_id_list:
                 person_id_list.append(objectID)
             text = "ID {}".format(objectID)
-            cv2.putText(frame, text, (centroid[0] - 10, centroid[1] - 10),cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
-            cv2.circle(frame, (centroid[0], centroid[1]), 4, (0, 255, 0), -1)
+            cv2.putText(frame, text, (centroid[0] - 10, centroid[1] - 10),cv2.FONT_HERSHEY_SIMPLEX, 0.5, (102, 220, 225), 2)
+            cv2.circle(frame, (centroid[0], centroid[1]), 4, (102, 220, 225), -1)
             #cv2.rectangle(frame, (centroid[0], centroid[1]), (centroid[2], centroid[3]), (255, 0, 0), 2)
 
         return frame, person_id_list, live_person_count, len(person_id_list)

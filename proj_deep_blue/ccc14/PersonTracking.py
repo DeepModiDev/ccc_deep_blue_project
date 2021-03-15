@@ -146,9 +146,9 @@ class PersonTracking:
                 text_up_person_count = "Up: " + str(totalUp)
                 text_down_person_count = "Down: " + str(totalDown)
                 text_status = "Down: " + str(status)
-                cv2.putText(frame, text_up_person_count, (20, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
-                cv2.putText(frame, text_down_person_count, (20, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
-                cv2.putText(frame, text_status, (20, 80), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+                cv2.putText(frame, text_up_person_count, (20, 25), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
+                cv2.putText(frame, text_down_person_count, (20, 55), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
+                cv2.putText(frame, text_status, (20, 85), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
                 frame_counter += 1
 
                 out.write(frame)
@@ -242,9 +242,9 @@ class PersonTracking:
                 rects.append([x, y, x + w, y + h])
                 color = [int(c) for c in COLORS[classIDs[i]]]
                 cv2.rectangle(frame, (x, y), (x + w, y + h), color, 2)
-                text = "{}: {:.4f}".format(LABELS[classIDs[i]], confidences[i])
-                cv2.putText(frame, text, (x, y - 5),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+                # text = "{}: {:.4f}".format(LABELS[classIDs[i]], confidences[i])
+                # cv2.putText(frame, text, (x, y - 5),
+                #             cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
 
         return frame, rects
 

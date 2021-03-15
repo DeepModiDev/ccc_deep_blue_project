@@ -13,8 +13,7 @@ import datetime
 class VideoCamera(object):
     def __init__(self,url,userId):
         self.url = url
-        self.video = cv2.VideoCapture(self.url)
-        self.ct = CentroidTracker(maxDisappeared=30, maxDistance=70)
+        self.ct = CentroidTracker(maxDisappeared=15, maxDistance=70)
         self.total_person_count = 0
         self.live_person_count = 0
         self.frame_counter = 0
@@ -32,12 +31,15 @@ class VideoCamera(object):
         self.Weights = self.get_weights(self.wpath)
         self.nets = self.load_model(self.CFG, self.Weights)
         self.Colors = self.get_colors(self.Lables)
+        self.video = cv2.VideoCapture(self.url,cv2.CAP_FFMPEG)
         self.out = cv2.VideoWriter('media/videos/detections/'+self.newName,-1,25.0, (1080,720))
         self.detectedVideo = DetectionVideos(videoTitle=self.newName, user_id=self.userId,
                         video=os.path.join('videos/detections/', self.newName),
                         thumbnail="videos/detections/thumbnails/" + self.newName.split('.')[0] + ".jpg",
                         date=datetime.datetime.now())
         self.countData = {}
+        # self.pos_frame = self.video.get(1)
+        # self.temp = None
 
     def get_colors(self, LABELS):
         # initialize a list of colors to represent each possible class label
@@ -74,6 +76,22 @@ class VideoCamera(object):
         self.out.release()
         self.detectedVideo.save()
 
+    # def get_video_capture(self):
+    #     self.temp = cv2.VideoCapture(self.url,cv2.CAP_FFMPEG)
+    #     counter = 0
+    #     while not self.temp.isOpened() or self.temp is None:
+    #         print("Check again...")
+    #         print(self.url)
+    #         self.temp = cv2.VideoCapture(self.url,cv2.CAP_FFMPEG)
+    #         cv2.waitKey(100)
+    #         counter += 1
+    #         print("Wait for the header ",counter)
+    #         if counter == 60:
+    #             break
+    #         if self.temp.isOpened():
+    #             return self.temp
+
+
     def get_frame(self):
         success, image = self.video.read()
 
@@ -90,9 +108,8 @@ class VideoCamera(object):
                 cv2.imwrite("media/videos/detections/thumbnails/" + self.newName.split('.')[0] + ".jpg", image)
 
 
-            if (self.frame_counter % 5 == 0):
+            if (self.frame_counter % 1 == 0):
                 (image, self.rects) = self.get_prediction(image, self.nets, W, H, self.Colors, self.Lables)
-            else:
                 (image, self.person_id_list, self.live_person_count, self.total_person_count) = self.tracking(image)
 
             text_live_person_count = "Live Person Count: " + str(self.live_person_count)
@@ -100,9 +117,14 @@ class VideoCamera(object):
             cv2.putText(image, text_live_person_count, (20, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
             self.frame_counter += 1
             self.out.write(image)
+        # else:
+        #     self.video.set(1, self.pos_frame - 1)
+        #     print("frame is not ready")
+        #     # It is better to wait for a while for the next frame to be ready
+        #     cv2.waitKey(10000)
 
         ret, jpeg = cv2.imencode('.jpg', image)
-        return jpeg.tobytes()
+        return (self.live_person_count,jpeg.tobytes())
 
     def get_prediction(self, frame, net, W, H, COLORS, LABELS):
 
@@ -123,7 +145,7 @@ class VideoCamera(object):
                 scores = detection[5:]
                 classID = np.argmax(scores)
                 confidence = scores[classID]
-                if confidence > 0.5:
+                if confidence > 0.5 and classID == 0:
                     box = detection[0:4] * np.array([W, H, W, H])
                     (centerX, centerY, width, height) = box.astype("int")
                     x = int(centerX - (width / 2))
