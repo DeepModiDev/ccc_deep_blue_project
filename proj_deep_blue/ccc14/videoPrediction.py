@@ -29,6 +29,7 @@ class VideoPrediction:
         self.detectedVideoUrl = ""
         self.newName = ""
         self.userId = None
+        self.totalCountSet = {0}
         self.frameQueue = Queue()
         self.detectionQueue = Queue()
         self.finalQueue = Queue()
@@ -138,11 +139,10 @@ class VideoPrediction:
 
                 text_live_person_count = "Live Person Count: " + str(live_person_count)
                 text_total_person_count = "Total Person Count: " + str(total_person_count)
-
+                self.totalCountSet.add(live_person_count)
                 cv2.putText(image, text_live_person_count, (20, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.75, (0, 0, 255), 3)
                 #cv2.putText(image, text_total_person_count, (20, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
                 frame_counter += 1
-
                 out.write(image)
             else:
                 break
@@ -150,7 +150,25 @@ class VideoPrediction:
         video.release()
         out.release()
 
-        detectedVideo = DetectionVideos(videoTitle=newName,user_id=self.getuserId(),video=os.path.join('videos/detections/',newName),thumbnail="videos/detections/thumbnails/"+newName.split('.')[0]+".jpg",date=datetime.datetime.now())
+        max_count = max(self.totalCountSet)
+        average = 0
+        i = 0
+        sorted_set = sorted(self.totalCountSet)
+        min_count = sorted_set[1]
+        for count in self.totalCountSet:
+            i += 1
+            average += count
+        average = average // i
+        median = 0
+        if len(sorted_set) % 2 == 0:
+            median += sorted_set[len(sorted_set) // 2]
+        else:
+            sum_near_median = sorted_set[len(sorted_set) // 2 - 1] + sorted_set[len(sorted_set) // 2]
+            median += (sum_near_median // 2)
+
+        print("Min:", min_count, "Max: ", max_count, "Average: ", average,"Median: ",median,"Range: ", min_count, "-", max_count,"Median: ")
+
+        detectedVideo = DetectionVideos(videoTitle=newName,user_id=self.getuserId(),video=os.path.join('videos/detections/',newName),thumbnail="videos/detections/thumbnails/"+newName.split('.')[0]+".jpg",date=datetime.datetime.now(),min_count=min_count,max_count=max_count,average_count=average,median_count=median)
         detectedVideo.save()
         self.setDetectedVideoUrl(detectedVideo.video)
 

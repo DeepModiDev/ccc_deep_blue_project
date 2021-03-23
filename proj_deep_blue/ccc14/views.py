@@ -4,7 +4,7 @@ import datetime
 from .imagePrediction import ImagePrediction
 from .videoPrediction import VideoPrediction
 from .PersonTracking import PersonTracking
-from .models import (Images, Videos, ImageDetails,MallOwnerShopOwner)
+from .models import (Images, Videos, ImageDetails,MallOwnerShopOwner,DetectionVideos)
 from django.contrib.auth.forms import (UserCreationForm)
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
@@ -15,11 +15,13 @@ from django.http.response import StreamingHttpResponse
 from .Camera import VideoCamera
 from urllib.parse import urlparse
 import gc
+from datetime import timedelta
 
 @login_required(login_url='/accounts/login/')
 def home(request):
     context = {}
     users = []
+
     if request.user.is_staff:
         mallOwnerShopOwners = MallOwnerShopOwner.objects.all()
         for owners in mallOwnerShopOwners:

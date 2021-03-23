@@ -30,6 +30,7 @@ class PersonTracking:
         self.detectedVideoUrl = ""
         self.newName = ""
         self.userId = None
+        self.totalCountSet = {0}
         self.frameQueue = Queue()
         self.detectionQueue = Queue()
         self.finalQueue = Queue()
@@ -113,6 +114,7 @@ class PersonTracking:
         totalUp = 0
         totalDown = 0
         frame_counter = 0
+        live_person_count = 0
         rects = []
 
         ct = CentroidTracker(maxDisappeared=40, maxDistance=50)
@@ -140,12 +142,13 @@ class PersonTracking:
 
                 else:
                     status = "Tracking"
-                    frame, trackableObjects, totalUp, totalDown = self.tracking(frame, rects, ct, H, trackableObjects,
+                    frame, trackableObjects, totalUp, totalDown, live_person_count = self.tracking(frame, rects, ct, H, trackableObjects,
                                                                            totalUp, totalDown)
 
                 text_up_person_count = "Up: " + str(totalUp)
                 text_down_person_count = "Down: " + str(totalDown)
                 text_status = "Down: " + str(status)
+                self.totalCountSet.add(live_person_count)
                 cv2.putText(frame, text_up_person_count, (20, 25), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
                 cv2.putText(frame, text_down_person_count, (20, 55), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
                 cv2.putText(frame, text_status, (20, 85), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
@@ -157,54 +160,28 @@ class PersonTracking:
 
         video.release()
         out.release()
-        print("Video title issssssssss:",self.getVideoTitle())
-        detectedVideo = DetectionVideos(videoTitle=newName,user_id=self.getuserId(),video=os.path.join('videos/detections/',newName),thumbnail="videos/detections/thumbnails/"+newName.split('.')[0]+".jpg",date=datetime.datetime.now())
+
+        max_count = max(self.totalCountSet)
+        average = 0
+        i = 0
+        sorted_set = sorted(self.totalCountSet)
+        min_count = sorted_set[1]
+        for count in self.totalCountSet:
+            i += 1
+            average += count
+        average = average // i
+        median = 0
+        if len(sorted_set) % 2 == 0:
+            median += sorted_set[len(sorted_set) // 2]
+        else:
+            sum_near_median = sorted_set[len(sorted_set) // 2 - 1] + sorted_set[len(sorted_set) // 2]
+            median += (sum_near_median // 2)
+
+        print("Min:", min_count, "Max: ", max_count, "Average: ", average, "Median: ", median, "Range: ", min_count,"-", max_count, "Median: ")
+
+        detectedVideo = DetectionVideos(videoTitle=newName,user_id=self.getuserId(),video=os.path.join('videos/detections/',newName),thumbnail="videos/detections/thumbnails/"+newName.split('.')[0]+".jpg",date=datetime.datetime.now(),min_count=min_count,max_count=max_count,average_count=average,median_count=median)
         detectedVideo.save()
         self.setDetectedVideoUrl(detectedVideo.video)
-
-    def feedVideo(self):
-        video = cv2.VideoCapture(self.getfeedURL())
-        # http://cam6284208.miemasu.net/nphMotionJpeg?Resolution=640x480&Quality=Clarity
-        start_time = time.time()
-        total_frames = 0
-        frame_count = 0
-        person_count = 0
-
-        if self.getVideoTitle() is not None:
-            frameOut = cv2.VideoWriter("media/videos/" + str(time.time()) + ".mp4", -1, 20.0, (1080, 720))
-        else:
-            frameOut = cv2.VideoWriter(time.time(), -1, 20.0, (1080, 720))
-
-        while (True):
-            check, image = video.read()
-            image = cv2.resize(image, (1080, 720))
-            #res = self.get_predection(image, self.nets, self.Lables, self.Colors)
-            total_frames = total_frames + 1
-
-            if(frame_count%15 == 0):
-                image,person_count = self.get_predection(image, self.nets, self.Lables, self.Colors)
-            frame_count = frame_count + 1
-
-            end_time = time.time()
-            time_diff = end_time - start_time
-            if time_diff == 0:
-                fps = 0
-            else:
-                fps = total_frames/time_diff
-            fps_text = "FPS: {:.2f}".format(fps)
-
-            cv2.putText(image, fps_text, (10, 20), cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (0, 0, 255), 1)
-            count_txt = "Person Count: {}".format(person_count)
-            cv2.putText(image,count_txt, (10,40),cv2.FONT_HERSHEY_COMPLEX_SMALL,1,(0,0,255),1)
-
-            cv2.imshow("capture", image)
-            frameOut.write(image)
-            key = cv2.waitKey(1)
-            if (key == ord('q')):
-                break
-
-        video.release()
-        cv2.destroyAllWindows()
 
     def get_prediction(self, frame, net, W, H, COLORS, LABELS):
 
@@ -213,9 +190,7 @@ class PersonTracking:
 
         blob = cv2.dnn.blobFromImage(frame, 1 / 255.0, (416, 416), swapRB=True, crop=False)
         net.setInput(blob)
-        start = time.time()
         layerOutputs = net.forward(ln)
-        end = time.time()
         boxes = []
         confidences = []
         classIDs = []
@@ -242,10 +217,6 @@ class PersonTracking:
                 rects.append([x, y, x + w, y + h])
                 color = [int(c) for c in COLORS[classIDs[i]]]
                 cv2.rectangle(frame, (x, y), (x + w, y + h), color, 2)
-                # text = "{}: {:.4f}".format(LABELS[classIDs[i]], confidences[i])
-                # cv2.putText(frame, text, (x, y - 5),
-                #             cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
-
         return frame, rects
 
     def tracking(self,frame, rects, ct, H, trackableObjects, totalUp, totalDown):
@@ -277,4 +248,4 @@ class PersonTracking:
             cv2.circle(frame, (centroid[0], centroid[1]), 4, (0, 255, 0), -1)
             #cv2.rectangle(frame, (centroid[0], centroid[1]), (centroid[2], centroid[3]), (255, 0, 0), 2)
 
-        return frame, trackableObjects, totalUp, totalDown
+        return frame, trackableObjects, totalUp, totalDown,live_person_count

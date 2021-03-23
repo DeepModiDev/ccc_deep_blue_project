@@ -16,7 +16,7 @@
     {% endif %}
 
     <!--History section-->
-    <div class="home-div" style="margin-top: 20px">
+    <div class="home-div">
         <div class="recent-activities card">
             <div class="card-header">
                 <h3 class="h4">
@@ -45,11 +45,12 @@
                 </video>
             </div>
 
+            <div class="recent-activities">
             {% if videos %}
             {% for video in videos %}
-                 <div  class="item no-padding">
+                 <div  id="deleteUserVideoRow-{{video.videoId}}" class="item no-padding">
                         <div class="container-fluid">
-                          <div id="deleteUserVideoRow-{{video.videoId}}" class="row">
+                          <div class="row">
 
                               <div class="col-lg-3 date-holder">
                                 <div class="no-padding">
@@ -61,7 +62,11 @@
 
                               <div class="col-lg-5" style="text-align: left;">
                                 <p style="font-size: 14px; color: black;"><b>Name: </b> {{video.videoTitle}}</p>
-                                <p style="font-size: 14px; color: black;"><b>Date: </b> {{ video.date.date}}<b>&nbsp;&nbsp;&nbsp;Time: </b> {{video.date.time}}</p>
+                                <p style="font-size: 14px; color: black;"><b>Date: </b> {{ video.date.date}} <b>&nbsp;&nbsp;&nbsp;Time: </b> {{video.date.time}}</p>
+                                <p style="font-size: 14px; color: black;"><b>Person Count Details: </b></p>
+                                <p style="font-size: 14px; color: black;"><b>Min: </b>&nbsp;{{ video.minPersonCount }}<b>&nbsp;&nbsp;Max: </b>&nbsp;{{ video.maxPersonCount }} <b>&nbsp;&nbsp;&nbsp;Average: </b>&nbsp;{{ video.avgPersonCount }}<b>&nbsp;&nbsp;Median: </b>&nbsp;{{ video.medianPersonCount }}</p>
+                                <p style="font-size: 14px; color: black;"></p>
+                                <p style="font-size: 14px; color: black;"><b>Range: </b>&nbsp;&nbsp;{{ video.minPersonCount }} - {{ video.maxPersonCount }}</p>
                               </div>
 
                             <div class="col-lg-4">
@@ -80,11 +85,12 @@
                             </div>
                         </div>
                     </div>
+                 </div>
             {% endfor %}
             {% else %}
                 <p><b><center>No history found</center></b></p>
             {% endif %}
-        </div>
+      </div>
     </div>
     </div>
 {% endblock %}

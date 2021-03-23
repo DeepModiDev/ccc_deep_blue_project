@@ -9,6 +9,7 @@ from .centroidtracker import CentroidTracker
 import datetime
 from .models import DetectionVideos
 import datetime
+import threading
 
 class VideoCamera(object):
     def __init__(self,url,userId):
@@ -17,6 +18,7 @@ class VideoCamera(object):
         self.total_person_count = 0
         self.live_person_count = 0
         self.frame_counter = 0
+        self.tota_of_live_count = 0
         self.rects = []
         self.person_id_list = []
         self.currentTime = datetime.datetime.now()
@@ -31,7 +33,7 @@ class VideoCamera(object):
         self.Weights = self.get_weights(self.wpath)
         self.nets = self.load_model(self.CFG, self.Weights)
         self.Colors = self.get_colors(self.Lables)
-        self.video = cv2.VideoCapture(self.url,cv2.CAP_FFMPEG)
+        self.video = cv2.VideoCapture(str(url),cv2.CAP_FFMPEG)
         self.out = cv2.VideoWriter('media/videos/detections/'+self.newName,-1,25.0, (1080,720))
         self.detectedVideo = DetectionVideos(videoTitle=self.newName, user_id=self.userId,
                         video=os.path.join('videos/detections/', self.newName),
@@ -40,6 +42,7 @@ class VideoCamera(object):
         self.countData = {}
         # self.pos_frame = self.video.get(1)
         # self.temp = None
+        #self.video.set(cv2.CAP_PROP_BUFFERSIZE, 1)
 
     def get_colors(self, LABELS):
         # initialize a list of colors to represent each possible class label
@@ -75,6 +78,7 @@ class VideoCamera(object):
         self.video.release()
         self.out.release()
         self.detectedVideo.save()
+        print("Live feed is saved.")
 
     # def get_video_capture(self):
     #     self.temp = cv2.VideoCapture(self.url,cv2.CAP_FFMPEG)
@@ -93,35 +97,41 @@ class VideoCamera(object):
 
 
     def get_frame(self):
-        success, image = self.video.read()
+        if self.video.isOpened():
+            success, image = self.video.read()
+            W = None
+            H = None
+            if success:
+                image = cv2.resize(image, (1080, 720))
 
-        W = None
-        H = None
+                if W is None or H is None:
+                    (H, W) = image.shape[:2]
 
-        if success:
-            image = cv2.resize(image, (1080, 720))
-
-            if W is None or H is None:
-                (H, W) = image.shape[:2]
-
-            if self.frame_counter == 0:
-                cv2.imwrite("media/videos/detections/thumbnails/" + self.newName.split('.')[0] + ".jpg", image)
+                if self.frame_counter == 0:
+                    cv2.imwrite("media/videos/detections/thumbnails/" + self.newName.split('.')[0] + ".jpg", image)
 
 
-            if (self.frame_counter % 1 == 0):
-                (image, self.rects) = self.get_prediction(image, self.nets, W, H, self.Colors, self.Lables)
-                (image, self.person_id_list, self.live_person_count, self.total_person_count) = self.tracking(image)
+                if (self.frame_counter % 1 == 0):
+                    (image, self.rects) = self.get_prediction(image, self.nets, W, H, self.Colors, self.Lables)
+                    (image, self.person_id_list, self.live_person_count, self.total_person_count) = self.tracking(image)
 
-            text_live_person_count = "Live Person Count: " + str(self.live_person_count)
+                text_live_person_count = "Live Person Count: " + str(self.live_person_count)
 
-            cv2.putText(image, text_live_person_count, (20, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
-            self.frame_counter += 1
-            self.out.write(image)
-        # else:
-        #     self.video.set(1, self.pos_frame - 1)
-        #     print("frame is not ready")
-        #     # It is better to wait for a while for the next frame to be ready
-        #     cv2.waitKey(10000)
+                cv2.putText(image, text_live_person_count, (20, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+                self.frame_counter += 1
+                self.out.write(image)
+            # else:
+            #     self.video.set(1, self.pos_frame - 1)
+            #     print("frame is not ready")
+            #     # It is better to wait for a while for the next frame to be ready
+            #     cv2.waitKey(10000)
+        else:
+            image = cv2.imread('media/loading.jpg')
+            no_image_found = cv2.imread('media/no_image_found.webp')
+            cv2.waitKey(500)
+            cv2.imwrite("media/videos/detections/thumbnails/" + self.newName.split('.')[0] + ".jpg", no_image_found)
+            self.video = cv2.VideoCapture('http://77.243.103.105:8081/mjpg/video.mjpg',cv2.CAP_FFMPEG)
+            print("Inside else part..",type(self.countData))
 
         ret, jpeg = cv2.imencode('.jpg', image)
         return (self.live_person_count,jpeg.tobytes())

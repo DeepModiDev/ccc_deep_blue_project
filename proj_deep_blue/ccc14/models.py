@@ -38,6 +38,10 @@ class DetectionVideos(models.Model):
     video = models.FileField(upload_to='videos/detections/')
     thumbnail = models.FileField(upload_to='videos/detections/thumbnails/')
     date = models.DateTimeField(auto_now_add=False,blank=True,auto_now=False)
+    min_count = models.IntegerField(blank=True,null=True)
+    max_count = models.IntegerField(blank=True,null=True)
+    average_count = models.IntegerField(blank=True,null=True)
+    median_count = models.IntegerField(blank=True,null=True)
 
     class Meta:
         verbose_name = 'Detection Video'

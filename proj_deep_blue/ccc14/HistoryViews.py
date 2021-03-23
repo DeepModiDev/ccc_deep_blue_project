@@ -17,7 +17,7 @@ def videos(request):
         userVideos = video_filter.qs
 
         for video in userVideos:
-            videoList.append({'videoURL': video.video.url, 'videoTitle': video.videoTitle, 'videoId': video.pk, 'videoThumbnail': video.thumbnail.url,'date':video.date})
+            videoList.append({'videoURL': video.video.url, 'videoTitle': video.videoTitle, 'videoId': video.pk, 'videoThumbnail': video.thumbnail.url,'date':video.date,'minPersonCount':video.min_count,'maxPersonCount':video.max_count,'avgPersonCount':video.average_count,'medianPersonCount':video.median_count})
 
         context = {
             "videos":videoList,
