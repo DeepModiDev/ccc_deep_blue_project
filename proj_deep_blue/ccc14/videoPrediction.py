@@ -6,7 +6,7 @@ import time
 from queue import Queue
 from threading import Thread, Event
 from .models import DetectionVideos
-confthres = 0.30 # confidence threshold value
+confthres = 0.60 # confidence threshold value
 nmsthres = 0.30
 yolo_path = os.path.join(os.getcwd(), "yolo_v4")
 import datetime

@@ -2,7 +2,7 @@ import cv2
 import os
 import numpy as np
 import time
-confthres = 0.50 # confidence threshold value
+confthres = 0.60 # confidence threshold value
 nmsthres = 0.30
 yolo_path = os.path.join(os.getcwd(), "yolo_v4")
 from .centroidtracker import CentroidTracker
@@ -18,7 +18,8 @@ class VideoCamera(object):
         self.total_person_count = 0
         self.live_person_count = 0
         self.frame_counter = 0
-        self.tota_of_live_count = 0
+        self.totalCountSet = {0}
+        self.roi = None
         self.rects = []
         self.person_id_list = []
         self.currentTime = datetime.datetime.now()
@@ -33,12 +34,9 @@ class VideoCamera(object):
         self.Weights = self.get_weights(self.wpath)
         self.nets = self.load_model(self.CFG, self.Weights)
         self.Colors = self.get_colors(self.Lables)
-        self.video = cv2.VideoCapture(str(url),cv2.CAP_FFMPEG)
+        self.video = cv2.VideoCapture(self.url,cv2.CAP_FFMPEG)
         self.out = cv2.VideoWriter('media/videos/detections/'+self.newName,-1,25.0, (1080,720))
-        self.detectedVideo = DetectionVideos(videoTitle=self.newName, user_id=self.userId,
-                        video=os.path.join('videos/detections/', self.newName),
-                        thumbnail="videos/detections/thumbnails/" + self.newName.split('.')[0] + ".jpg",
-                        date=datetime.datetime.now())
+        self.detectedVideo = None
         self.countData = {}
         # self.pos_frame = self.video.get(1)
         # self.temp = None
@@ -77,24 +75,42 @@ class VideoCamera(object):
     def __del__(self):
         self.video.release()
         self.out.release()
+        max_count = max(self.totalCountSet)
+        average = 0
+        i = 0
+
+        sorted_set = sorted(self.totalCountSet)
+        min_count = 0
+
+        if len(sorted_set) == 1:
+            min_count += 0
+        else:
+            min_count += sorted_set[1]
+
+        for count in self.totalCountSet:
+            i += 1
+            average += count
+
+        average = average // i
+        median = 0
+        if len(sorted_set) % 2 == 0:
+            median += sorted_set[len(sorted_set) // 2]
+        else:
+            sum_near_median = sorted_set[len(sorted_set) // 2 - 1] + sorted_set[len(sorted_set) // 2]
+            median += (sum_near_median // 2)
+
+        if min_count == 1:
+            average += 1
+
+        print("Min:", min_count, "Max: ", max_count, "Average: ", average, "Median: ", median, "Range: ", min_count,
+              "-", max_count, "Median: ")
+
+        self.detectedVideo = DetectionVideos(videoTitle=self.newName, user_id=self.userId,
+                        video=os.path.join('videos/detections/', self.newName),
+                        thumbnail="videos/detections/thumbnails/" + self.newName.split('.')[0] + ".jpg",
+                        date=datetime.datetime.now(),min_count=min_count,max_count=max_count,average_count=average,median_count=median)
         self.detectedVideo.save()
         print("Live feed is saved.")
-
-    # def get_video_capture(self):
-    #     self.temp = cv2.VideoCapture(self.url,cv2.CAP_FFMPEG)
-    #     counter = 0
-    #     while not self.temp.isOpened() or self.temp is None:
-    #         print("Check again...")
-    #         print(self.url)
-    #         self.temp = cv2.VideoCapture(self.url,cv2.CAP_FFMPEG)
-    #         cv2.waitKey(100)
-    #         counter += 1
-    #         print("Wait for the header ",counter)
-    #         if counter == 60:
-    #             break
-    #         if self.temp.isOpened():
-    #             return self.temp
-
 
     def get_frame(self):
         if self.video.isOpened():
@@ -109,6 +125,27 @@ class VideoCamera(object):
 
                 if self.frame_counter == 0:
                     cv2.imwrite("media/videos/detections/thumbnails/" + self.newName.split('.')[0] + ".jpg", image)
+                    # Select ROI
+                    text = "Press 's' to select region to be blurred..."
+                    cv2.putText(image, text, (50, 50), cv2.FONT_HERSHEY_SIMPLEX,0.5, (0, 0, 255), 2)
+
+                    cv2.imshow("Image", image)
+                    key = cv2.waitKey(0)
+                    if key == ord('s'):
+                        # Select ROI
+                        text = "Press ENTER or SPACE to continue..."
+                        cv2.putText(image, text, (70, 70), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+                        self.roi = cv2.selectROI(windowName='Image', img=image, showCrosshair=True, fromCenter=False)
+                        image[self.roi[1]:self.roi[1] + self.roi[3], self.roi[0]:self.roi[0] + self.roi[2], :] = cv2.blur(
+                            src=image[self.roi[1]:self.roi[1] + self.roi[3], self.roi[0]:self.roi[0] + self.roi[2], :], ksize=(11, 11))
+                        #cv2.imshow("Image",image)
+                        cv2.destroyWindow(winname="Image")
+                    elif key == ord('q'):
+                        cv2.destroyWindow(winname="Image")
+                        print("Quitting...")
+                    else:
+                        cv2.destroyWindow(winname="Image")
+                        pass
 
 
                 if (self.frame_counter % 1 == 0):
@@ -116,21 +153,24 @@ class VideoCamera(object):
                     (image, self.person_id_list, self.live_person_count, self.total_person_count) = self.tracking(image)
 
                 text_live_person_count = "Live Person Count: " + str(self.live_person_count)
+                self.totalCountSet.add(self.live_person_count)
+
+                if self.roi is not None:
+                    image[self.roi[1]:self.roi[1] + self.roi[3], self.roi[0]:self.roi[0] + self.roi[2], :] = cv2.blur(
+                        src=image[self.roi[1]:self.roi[1] + self.roi[3], self.roi[0]:self.roi[0] + self.roi[2], :],
+                        ksize=(11, 11))
+                    cv2.rectangle(image, (self.roi[0], self.roi[1]),
+                                  (self.roi[0] + self.roi[2], self.roi[1] + self.roi[3]),
+                                  (0, 255, 0), 2)
 
                 cv2.putText(image, text_live_person_count, (20, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
                 self.frame_counter += 1
                 self.out.write(image)
-            # else:
-            #     self.video.set(1, self.pos_frame - 1)
-            #     print("frame is not ready")
-            #     # It is better to wait for a while for the next frame to be ready
-            #     cv2.waitKey(10000)
         else:
             image = cv2.imread('media/loading.jpg')
             no_image_found = cv2.imread('media/no_image_found.webp')
-            cv2.waitKey(500)
             cv2.imwrite("media/videos/detections/thumbnails/" + self.newName.split('.')[0] + ".jpg", no_image_found)
-            self.video = cv2.VideoCapture('http://77.243.103.105:8081/mjpg/video.mjpg',cv2.CAP_FFMPEG)
+            self.video = cv2.VideoCapture(self.url,cv2.CAP_FFMPEG)
             print("Inside else part..",type(self.countData))
 
         ret, jpeg = cv2.imencode('.jpg', image)
@@ -143,9 +183,7 @@ class VideoCamera(object):
 
         blob = cv2.dnn.blobFromImage(frame, 1 / 255.0, (416, 416), swapRB=True, crop=False)
         net.setInput(blob)
-        start = time.time()
         layerOutputs = net.forward(ln)
-        end = time.time()
         boxes = []
         confidences = []
         classIDs = []
@@ -165,11 +203,24 @@ class VideoCamera(object):
                     classIDs.append(classID)
         idxs = cv2.dnn.NMSBoxes(boxes, confidences, 0.5, 0.3)
         rects = []
+
         if len(idxs) > 0:
             for i in idxs.flatten():
                 (x, y) = (boxes[i][0], boxes[i][1])
                 (w, h) = (boxes[i][2], boxes[i][3])
+
+                if self.roi is not None:
+                    if (x > self.roi[0] and y > self.roi[1]) and (x < self.roi[0] + self.roi[2] and y < self.roi[1] + self.roi[3]):
+                        frame[self.roi[1]:self.roi[1] + self.roi[3], self.roi[0]:self.roi[0] + self.roi[2],:] = cv2.blur(
+                            src=frame[self.roi[1]:self.roi[1] + self.roi[3], self.roi[0]:self.roi[0] + self.roi[2], :],
+                            ksize=(11, 11))
+                        cv2.rectangle(frame, (self.roi[0], self.roi[1]),
+                                      (self.roi[0] + self.roi[2], self.roi[1] + self.roi[3]),
+                                      (0, 255, 0), 2)
+                        continue
+
                 rects.append([x, y, x + w, y + h])
+
                 color = [int(c) for c in COLORS[classIDs[i]]]
                 cv2.rectangle(frame, (x, y), (x + w, y + h), color, 2)
                 text = "{}: {:.4f}".format(LABELS[classIDs[i]], confidences[i])
