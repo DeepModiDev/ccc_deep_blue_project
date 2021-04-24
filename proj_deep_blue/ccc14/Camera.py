@@ -22,6 +22,8 @@ class VideoCamera(object):
         self.roi = None
         self.rects = []
         self.person_id_list = []
+        print("Getted url: ",url)
+        self.video = cv2.VideoCapture(url,cv2.CAP_FFMPEG)
         self.currentTime = datetime.datetime.now()
         self.newName = str(self.currentTime.day) + "_" + str(self.currentTime.month) + "_" + str(self.currentTime.year) \
                        + "_" + str(self.currentTime.second) + str(self.currentTime.microsecond) + ".mp4"
@@ -34,10 +36,13 @@ class VideoCamera(object):
         self.Weights = self.get_weights(self.wpath)
         self.nets = self.load_model(self.CFG, self.Weights)
         self.Colors = self.get_colors(self.Lables)
-        self.video = cv2.VideoCapture(self.url,cv2.CAP_FFMPEG)
         self.out = cv2.VideoWriter('media/videos/detections/'+self.newName,-1,25.0, (1080,720))
         self.detectedVideo = None
         self.countData = {}
+        self.canvasX = 0
+        self.canvasY = 0
+        self.canvasH = 0
+        self.canvasW = 0
         # self.pos_frame = self.video.get(1)
         # self.temp = None
         #self.video.set(cv2.CAP_PROP_BUFFERSIZE, 1)
@@ -113,8 +118,8 @@ class VideoCamera(object):
         print("Live feed is saved.")
 
     def get_frame(self):
-        if self.video.isOpened():
-            success, image = self.video.read()
+        success,image = self.video.read()
+        if success:
             W = None
             H = None
             if success:
@@ -146,7 +151,6 @@ class VideoCamera(object):
                     else:
                         cv2.destroyWindow(winname="Image")
                         pass
-
 
                 if (self.frame_counter % 1 == 0):
                     (image, self.rects) = self.get_prediction(image, self.nets, W, H, self.Colors, self.Lables)

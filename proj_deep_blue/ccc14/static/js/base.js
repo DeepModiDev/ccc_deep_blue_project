@@ -281,6 +281,7 @@ function showProgress() {
 		$('#imageLoadingText').show();
 }
 
+
 /**
 ######################## please dont delete this comment this is very important comment ############################
 

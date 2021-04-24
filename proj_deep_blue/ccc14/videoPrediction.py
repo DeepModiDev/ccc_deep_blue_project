@@ -20,6 +20,14 @@ from .centroidtracker import CentroidTracker
 # 16_02_2021/proj_deep_blue_16_02_2021_cfg_upto_3000.cfg
 # 16_02_2021/proj_deep_blue_16_02_2021_cfg_best.weights
 
+# 28_03_2021/all_img_xml_head_3717_mannequin_head_3219.cfg
+# 28_03_2021/all_img_xml_head_3717_mannequin_head_3219_names.names
+# 28_03_2021/all_img_xml_head_3717_mannequin_head_3219_last.weights
+
+# 11_03_2021/custom_best.weights
+# 11_03_2021/custom.cfg
+# 11_03_2021/obj.names
+
 class VideoPrediction:
 
     def __init__(self):
@@ -154,7 +162,11 @@ class VideoPrediction:
         average = 0
         i = 0
         sorted_set = sorted(self.totalCountSet)
-        min_count = sorted_set[1]
+        if len(sorted_set) > 0:
+            min_count = sorted_set[1]
+        else:
+            min_count = sorted_set[0]
+
         for count in self.totalCountSet:
             i += 1
             average += count

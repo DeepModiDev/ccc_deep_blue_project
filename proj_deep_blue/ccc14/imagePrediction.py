@@ -10,6 +10,13 @@ LABELS = "11_03_2021/obj.names"
 CFG = "11_03_2021/custom.cfg"
 WEIGHTS = "11_03_2021/custom_best.weights"
 
+######### this is the latest version ##########
+# LABELS = "11_03_2021/obj.names"
+# CFG = "11_03_2021/custom.cfg"
+# WEIGHTS = "11_03_2021/custom_best.weights"
+###############################################
+
+
 # karan_custom_23_01_21.cfg
 # karan_custom_best_23_01_21.weights
 # obj.names

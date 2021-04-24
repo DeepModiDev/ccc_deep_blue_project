@@ -273,7 +273,7 @@ def validator(fileName):
         return False
 
 def validatorVideo(fileName):
-    extensions = [".mp4", ".avi"]
+    extensions = [".mp4", ".avi",".mpg"]
     (_, fileExtension) = os.path.splitext(fileName)
     if fileExtension in extensions:
         return True
